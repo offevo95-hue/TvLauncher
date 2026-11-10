@@ -1,6 +1,6 @@
 """
-Key Remapper Module for TV Launcher - STYLED VERSION
-Matches the launcher's visual design
+Модуль переназначения клавиш для TV Launcher — СТИЛИЗОВАННАЯ ВЕРСИЯ
+Соответствует визуальному дизайну лаунчера
 """
 
 from PyQt6.QtWidgets import (
@@ -21,9 +21,9 @@ except ImportError:
 
 
 class KeyMapper:
-    """Core mapping logic - translates user inputs to actions"""
+    """Основная логика маппинга — преобразует действия пользователя"""
     
-    # Default keyboard mappings
+    # Стандартные маппинги клавиатуры по умолчанию
     DEFAULT_KEYBOARD = {
         'navigate_left': Qt.Key.Key_Left,
         'navigate_right': Qt.Key.Key_Right,
@@ -39,7 +39,7 @@ class KeyMapper:
         'change_category': Qt.Key.Key_C,
     }
     
-    # Mappa inversa dalle azioni ai tasti standard
+    # Обратный маппинг из действий в стандартные клавиши
     ACTION_TO_DEFAULT_KEY = {
         'navigate_left': Qt.Key.Key_Left,
         'navigate_right': Qt.Key.Key_Right,
@@ -57,7 +57,7 @@ class KeyMapper:
     
     @staticmethod
     def get_default_config():
-        """Get default configuration for fresh installs or resets"""
+        """Получить конфигурацию по умолчанию для новых установок или сброса"""
         mapper = KeyMapper.__new__(KeyMapper)
         mapper._reset_to_defaults()
         return {
@@ -68,23 +68,23 @@ class KeyMapper:
     
     
     PROFILES = {
-        'keyboard': ('⌨️ Keyboard / Remote Control', DEFAULT_KEYBOARD),
+        'keyboard': ('⌨️ Клавиатура / Пульт ДУ', DEFAULT_KEYBOARD),
         
     }
     
     ACTION_NAMES = {
-        'navigate_left': 'Navigate Left',
-        'navigate_right': 'Navigate Right',
-        'navigate_up': 'Navigate Up',
-        'navigate_down': 'Navigate Down',
-        'launch': 'Launch App',
-        'back': 'Back / Cancel',
-        'edit': 'Edit App',
-        'delete': 'Delete App',
-        'quick_search': 'Quick Search',
-        'reorder_mode': 'Reorder Mode',
-        'settings': 'Settings Menu',
-        'change_category': 'Change Category',
+        'navigate_left': 'Влево',
+        'navigate_right': 'Вправо',
+        'navigate_up': 'Вверх',
+        'navigate_down': 'Вниз',
+        'launch': 'Запустить приложение',
+        'back': 'Назад / Отмена',
+        'edit': 'Изменить приложение',
+        'delete': 'Удалить приложение',
+        'quick_search': 'Быстрый поиск',
+        'reorder_mode': 'Режим сортировки',
+        'settings': 'Меню настроек',
+        'change_category': 'Изменить категорию',
     }
     
     def __init__(self, config_file='key_mappings.json'):
@@ -96,34 +96,34 @@ class KeyMapper:
     
     def translate_key(self, pressed_key):
         """
-        Traduce un tasto premuto nel tasto standard che il launcher si aspetta
+        Переводит нажатую клавишу в стандартную клавишу, которую ожидает лаунчер
         
-        Esempio:
-        - Utente ha mappato "Settings" su Qt.Key.Key_P
-        - Utente preme P
-        - translate_key(Qt.Key.Key_P) → restituisce Qt.Key.Key_S
-        - Il launcher riceve Qt.Key.Key_S e apre le impostazioni
+        Пример:
+        - Пользователь назначил "Settings" на Qt.Key.Key_P
+        - Пользователь нажимает P
+        - translate_key(Qt.Key.Key_P) → возвращает Qt.Key.Key_S
+        - Лаунчер получает Qt.Key.Key_S и открывает настройки
         """
-        # Ottieni l'azione associata al tasto premuto
+        # Получаем действие, связанное с нажатой клавишей
         action = self.get_action_for_key(pressed_key)
         
         if action:
-            # Restituisci il tasto standard per quell'azione
+            # Возвращаем стандартную клавишу для этого действия
             return self.ACTION_TO_DEFAULT_KEY.get(action, pressed_key)
         
-        # Se non è mappato, restituisci il tasto originale
+        # Если клавиша не привязана, возвращаем оригинальную
         return pressed_key
     
     def load_mappings(self):
-        """Load mappings from file or use defaults"""
+        """Загрузка маппингов из файла или использование значений по умолчанию"""
         if self.config_file.exists():
             try:
                 with open(self.config_file, 'r') as f:
                     data = json.load(f)
-                    self.current_profile = 'keyboard'  # ← Sempre keyboard
+                    self.current_profile = 'keyboard'  # ← Всегда keyboard
                     self.mappings = data.get('mappings', {})
                     
-                    #  Assicurati che esista solo il profilo keyboard
+                    # Убедимся, что существует только профиль keyboard
                     if 'keyboard' not in self.mappings:
                         self.mappings['keyboard'] = self._serialize_mapping(
                             self.DEFAULT_KEYBOARD
@@ -134,14 +134,14 @@ class KeyMapper:
             self._reset_to_defaults()
 
     def _reset_to_defaults(self):
-        """Reset to default keyboard mapping"""
+        """Сброс к маппингу клавиатуры по умолчанию"""
         self.mappings = {
             'keyboard': self._serialize_mapping(self.DEFAULT_KEYBOARD)
         }
         self.current_profile = 'keyboard'
     
     def save_mappings(self):
-        """Save mappings to file"""
+        """Сохранение маппингов в файл"""
         data = {
             'current_profile': self.current_profile,
             'mappings': self.mappings
@@ -150,13 +150,13 @@ class KeyMapper:
             json.dump(data, f, indent=2)
     
     def _reset_to_defaults(self):
-        """Reset all profiles to default mappings"""
+        """Сброс всех профилей к маппингам по умолчанию"""
         self.mappings = {}
         for profile_id, (_, default_map) in self.PROFILES.items():
             self.mappings[profile_id] = self._serialize_mapping(default_map)
     
     def _serialize_mapping(self, mapping):
-        """Convert Qt.Key enum to serializable format"""
+        """Конвертация Qt.Key enum в сериализуемый формат"""
         serialized = {}
         for action, key in mapping.items():
             if isinstance(key, Qt.Key):
@@ -166,40 +166,40 @@ class KeyMapper:
         return serialized
     
     def _deserialize_key(self, key_str):
-        """Convert serialized key back to Qt.Key or button string"""
-        #  Gestisci interi (per retrocompatibilità)
+        """Конвертация сериализованной клавиши обратно в Qt.Key или строку кнопки"""
+        # Обработка целых чисел (для обратной совместимости)
         if isinstance(key_str, int):
             try:
                 return Qt.Key(key_str)
             except:
-                print(f"⚠️ Cannot convert int {key_str} to Qt.Key")
+                print(f"⚠️ Не удалось конвертировать int {key_str} в Qt.Key")
                 return key_str
         
-        #  Gestisci stringhe serializzate "key_XXXXX"
+        # Обработка сериализованных строк "key_XXXXX"
         if isinstance(key_str, str) and key_str.startswith('key_'):
             try:
                 key_value = int(key_str.split('_')[1])
                 return Qt.Key(key_value)
             except Exception as e:
-                print(f"⚠️ Error deserializing {key_str}: {e}")
+                print(f"⚠️ Ошибка десериализации {key_str}: {e}")
                 return key_str
         
-        #  Button strings (button_0, dpad_left, etc.)
+        # Строки кнопок (button_0, dpad_left и т.д.)
         return key_str
     
     def get_current_mappings(self):
-        """Get current profile's mappings"""
+        """Получение маппингов текущего профиля"""
         mapping = self.mappings.get(self.current_profile, {})
         return {action: self._deserialize_key(key) for action, key in mapping.items()}
     
     def set_profile(self, profile_id):
-        """Switch to a different profile"""
+        """Переключение на другой профиль"""
         if profile_id in self.PROFILES:
             self.current_profile = profile_id
             self.save_mappings()
     
     def remap_action(self, action, new_key):
-        """Remap a specific action to a new key"""
+        """Переназначение конкретного действия на новую клавишу"""
         if action in self.ACTION_NAMES:
             if isinstance(new_key, Qt.Key):
                 self.mappings[self.current_profile][action] = f"key_{new_key.value}"
@@ -208,7 +208,7 @@ class KeyMapper:
             self.save_mappings()
     
     def get_action_for_key(self, key):
-        """Get action name for a given key/button"""
+        """Получение имени действия для заданной клавиши/кнопки"""
         current = self.get_current_mappings()
         for action, mapped_key in current.items():
             if mapped_key == key:
@@ -216,16 +216,16 @@ class KeyMapper:
         return None
     
     def reset_profile_to_default(self):
-        """Reset current profile to defaults"""
+        """Сброс текущего профиля к значениям по умолчанию"""
         if self.current_profile in self.PROFILES:
             default_map = self.PROFILES[self.current_profile][1]
             self.mappings[self.current_profile] = self._serialize_mapping(default_map)
             self.save_mappings()
     
-    #  Event filter globale per tradurre automaticamente i tasti
+    # Глобальный фильтр событий для автоматического перевода клавиш
     def install_event_filter(self, app):
         """
-        Installa un filtro globale per tradurre automaticamente tutti i tasti
+        Установка глобального фильтра для автоматического перевода всех клавиш
         """
         class KeyTranslatorFilter(QObject):
             def __init__(self, mapper):
@@ -233,15 +233,15 @@ class KeyMapper:
                 self.mapper = mapper
             
             def eventFilter(self, obj, event):
-                # Intercetta solo eventi KeyPress
+                # Перехватываем только события KeyPress
                 if event.type() == QEvent.Type.KeyPress:
                     original_key = event.key()
                     translated_key = self.mapper.translate_key(original_key)
                     
-                    # Se il tasto è stato tradotto, sostituiscilo
+                    # Если клавиша была переведена, заменяем её
                     if translated_key != original_key:
                         try:
-                            # Crea un nuovo evento con il tasto tradotto
+                            # Создаем новое событие с переведенной клавишей
                             new_event = QKeyEvent(
                                 QEvent.Type.KeyPress,
                                 translated_key,
@@ -250,20 +250,20 @@ class KeyMapper:
                                 event.isAutoRepeat(),
                                 event.count()
                             )
-                            # Invia il nuovo evento
+                            # Отправляем новое событие
                             app.sendEvent(obj, new_event)
-                            return True  # Blocca l'evento originale
+                            return True  # Блокируем оригинальное событие
                         except:
                             pass
                 
-                return False  # Lascia passare gli altri eventi
+                return False  # Пропускаем остальные события
         
         self.filter = KeyTranslatorFilter(self)
         app.installEventFilter(self.filter)
 
 
 class KeyCaptureDialog(QDialog):
-    """Dialog to capture a single key/button press - STYLED VERSION"""
+    """Диалог для захвата нажатия одной клавиши / кнопки — СТИЛИЗОВАННАЯ ВЕРСИЯ"""
     
     key_captured = pyqtSignal(object)
     
@@ -275,7 +275,7 @@ class KeyCaptureDialog(QDialog):
         self.joystick = None
         self.timer = None
         
-        #  IMPORTANTE: Inizializza instruction_label PRIMA di init_ui
+        # ВАЖНО: Инициализируем instruction_label ДО вызова init_ui
         self.instruction_label = None
         
         if PYGAME_AVAILABLE:
@@ -295,14 +295,14 @@ class KeyCaptureDialog(QDialog):
             self.timer.start(16)
     
     def init_ui(self):
-        self.setWindowTitle("Capture Input")
+        self.setWindowTitle("Захват ввода")
         self.setModal(True)
         self.setFixedSize(self.scaling.scale(550), self.scaling.scale(350))
         
-        #  IMPORTANTE: Permetti il focus per catturare i tasti
+        # ВАЖНО: Разрешаем фокус для перехвата клавиш
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         
-        # Stile coerente con settings menu
+        # Стиль, согласованный с меню настроек
         self.setStyleSheet("""
             QDialog { 
                 background-color: #1a1a1a; 
@@ -318,7 +318,7 @@ class KeyCaptureDialog(QDialog):
             self.scaling.scale(30)
         )
         
-        # === HEADER ===
+        # === ШАПКА ===
         header_widget = QWidget()
         header_widget.setStyleSheet(f"""
             QWidget {{
@@ -330,7 +330,7 @@ class KeyCaptureDialog(QDialog):
         header_layout = QVBoxLayout(header_widget)
         header_layout.setSpacing(self.scaling.scale(10))
         
-        title = QLabel("🎮 Remap Action")
+        title = QLabel("🎮 Переназначение действия")
         title.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -358,7 +358,7 @@ class KeyCaptureDialog(QDialog):
         
         layout.addWidget(header_widget)
         
-        # === INSTRUCTION BOX ===
+        # === БЛОК ИНСТРУКЦИЙ ===
         instruction_box = QWidget()
         instruction_box.setStyleSheet(f"""
             QWidget {{
@@ -373,7 +373,7 @@ class KeyCaptureDialog(QDialog):
         instruction_layout.setSpacing(self.scaling.scale(15))
         
         
-        self.instruction_label = QLabel("⌨️ Press any key or button...")
+        self.instruction_label = QLabel("⌨️ Нажмите любую клавишу или кнопку...")
         
         self.instruction_label.setStyleSheet(f"""
             QLabel {{
@@ -388,7 +388,7 @@ class KeyCaptureDialog(QDialog):
         self.instruction_label.setWordWrap(True)
         instruction_layout.addWidget(self.instruction_label)
         
-        hint = QLabel("(or Esc to cancel)")
+        hint = QLabel("(или Esc для отмены)")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: #888;
@@ -405,10 +405,10 @@ class KeyCaptureDialog(QDialog):
         
         
         
-        # === CANCEL BUTTON ===
-        cancel_btn = QPushButton("Cancel (Esc)")
+        # === КНОПКА ОТМЕНЫ ===
+        cancel_btn = QPushButton("Отмена (Esc)")
         cancel_btn.setFixedHeight(self.scaling.scale(50))
-        cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)  # Solo questo pulsante non deve avere focus
+        cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)  # Только эта кнопка не должна иметь фокус
         cancel_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #2a2a2a;
@@ -427,27 +427,27 @@ class KeyCaptureDialog(QDialog):
         
         self.setLayout(layout)
         
-        #  Forza il focus sul dialog quando si apre
+        # Принудительно устанавливаем фокус на диалог при открытии
         QTimer.singleShot(50, lambda: self.setFocus())
     
     def poll_joystick(self):
-        """Poll joystick con feedback visivo"""
+        """Опрос джойстика с визуальным откликом"""
         if not self.joystick:
             return
         
-        #  Controllo di sicurezza
+        # Проверка безопасности
         if self.instruction_label is None:
             return
         
         try:
             pygame.event.pump()
             
-            # Check buttons
+            # Проверка кнопок
             for i in range(self.joystick.get_numbuttons()):
                 if self.joystick.get_button(i):
                     self.captured_key = f"button_{i}"
-                    # Feedback visivo
-                    self.instruction_label.setText(f"✅ Captured: Button {i}")
+                    # Визуальный отклик
+                    self.instruction_label.setText(f"✅ Захвачено: Кнопка {i}")
                     self.instruction_label.setStyleSheet(f"""
                         QLabel {{
                             color: #4CAF50;
@@ -460,21 +460,21 @@ class KeyCaptureDialog(QDialog):
                     QTimer.singleShot(300, self.accept)
                     return
             
-            # Check D-Pad
+            # Проверка D-Pad (крестовины)
             if self.joystick.get_numhats() > 0:
                 hat = self.joystick.get_hat(0)
                 direction_map = {
-                    (1, 0): ("dpad_right", "→ D-Pad Right"),
-                    (-1, 0): ("dpad_left", "← D-Pad Left"),
-                    (0, 1): ("dpad_up", "↑ D-Pad Up"),
-                    (0, -1): ("dpad_down", "↓ D-Pad Down"),
+                    (1, 0): ("dpad_right", "→ Крестовина Вправо"),
+                    (-1, 0): ("dpad_left", "← Крестовина Влево"),
+                    (0, 1): ("dpad_up", "↑ Крестовина Вверх"),
+                    (0, -1): ("dpad_down", "↓ Крестовина Вниз"),
                 }
                 
                 if hat in direction_map:
                     key, display = direction_map[hat]
                     self.captured_key = key
-                    # Feedback visivo
-                    self.instruction_label.setText(f"✅ Captured: {display}")
+                    # Визуальный отклик
+                    self.instruction_label.setText(f"✅ Захвачено: {display}")
                     self.instruction_label.setStyleSheet(f"""
                         QLabel {{
                             color: #4CAF50;
@@ -490,23 +490,23 @@ class KeyCaptureDialog(QDialog):
             pass
     
     def keyPressEvent(self, event: QKeyEvent):
-        """Cattura input tastiera con feedback visivo"""
+        """Захват ввода с клавиатуры с визуальным откликом"""
         if event.key() == Qt.Key.Key_Escape:
             self.reject()
             return
         
-        #  Mostra feedback visivo
+        # Показываем визуальный отклик
         self.captured_key = event.key()
         
-        #  Controllo di sicurezza
+        # Проверка безопасности
         if self.instruction_label is None:
-            print("⚠️ Warning: instruction_label is None!")
+            print("⚠️ Предупреждение: instruction_label равен None!")
             self.accept()
             return
         
-        # Aggiorna il testo con conferma
+        # Обновляем текст с подтверждением
         key_display = self._get_key_display_name(self.captured_key)
-        self.instruction_label.setText(f"✅ Captured: {key_display}")
+        self.instruction_label.setText(f"✅ Захвачено: {key_display}")
         self.instruction_label.setStyleSheet(f"""
             QLabel {{
                 color: #4CAF50;
@@ -517,18 +517,18 @@ class KeyCaptureDialog(QDialog):
             }}
         """)
         
-        # Chiudi dopo un breve delay per mostrare il feedback
+        # Закрываем диалог после небольшой задержки для отображения отклика
         QTimer.singleShot(300, self.accept)
     
     def _get_key_display_name(self, key):
-        """Ottiene un nome leggibile per il tasto"""
+        """Получение читаемого имени для клавиши"""
         special_keys = {
-            Qt.Key.Key_Left: "← Left",
-            Qt.Key.Key_Right: "→ Right",
-            Qt.Key.Key_Up: "↑ Up",
-            Qt.Key.Key_Down: "↓ Down",
+            Qt.Key.Key_Left: "← Влево",
+            Qt.Key.Key_Right: "→ Вправо",
+            Qt.Key.Key_Up: "↑ Вверх",
+            Qt.Key.Key_Down: "↓ Вниз",
             Qt.Key.Key_Return: "Enter",
-            Qt.Key.Key_Space: "Space",
+            Qt.Key.Key_Space: "Пробел",
             Qt.Key.Key_Delete: "Delete",
             Qt.Key.Key_Backspace: "Backspace",
         }
@@ -549,7 +549,7 @@ class KeyCaptureDialog(QDialog):
                 name = name[4:]
             return name
         except:
-            return "Key"
+            return "Клавиша"
     
     def get_captured_key(self):
         return self.captured_key
@@ -566,8 +566,8 @@ class KeyCaptureDialog(QDialog):
         
     def install_event_filter(self, app):
         """
-        Installa un filtro globale per tradurre automaticamente tutti i tasti
-        Chiamalo subito dopo aver creato il KeyMapper nel launcher
+        Установка глобального фильтра для автоматического перевода всех клавиш.
+        Вызывайте сразу после создания KeyMapper в лаунчере.
         """
         class KeyTranslatorFilter(QObject):
             def __init__(self, mapper):
@@ -575,14 +575,14 @@ class KeyCaptureDialog(QDialog):
                 self.mapper = mapper
             
             def eventFilter(self, obj, event):
-                # Intercetta solo eventi KeyPress
+                # Перехватываем только события KeyPress
                 if event.type() == QEvent.Type.KeyPress:
                     original_key = event.key()
                     translated_key = self.mapper.translate_key(original_key)
                     
-                    # Se il tasto è stato tradotto, crea un nuovo evento
+                    # Если клавиша была переведена, создаем новое событие
                     if translated_key != original_key:
-                        # Crea un nuovo evento con il tasto tradotto
+                        # Создаем новое событие с переведенной клавишей
                         new_event = QKeyEvent(
                             QEvent.Type.KeyPress,
                             translated_key,
@@ -591,11 +591,11 @@ class KeyCaptureDialog(QDialog):
                             event.isAutoRepeat(),
                             event.count()
                         )
-                        # Sostituisci l'evento originale
+                        # Заменяем оригинальное событие
                         app.postEvent(obj, new_event)
-                        return True  # Blocca l'evento originale
+                        return True  # Блокируем оригинальное событие
                 
-                return False  # Lascia passare gli altri eventi
+                return False  # Пропускаем остальные события
         
         from PyQt6.QtCore import QObject, QEvent
         self.filter = KeyTranslatorFilter(self)
@@ -603,7 +603,7 @@ class KeyCaptureDialog(QDialog):
 
 
 class KeyRemapperDialog(QDialog):
-    """Main key remapping dialog - FINAL VERSION (Launcher Style)"""
+    """Главный диалог переназначения клавиш — ФИНАЛЬНАЯ ВЕРСИЯ (в стиле лаунчера)"""
     
     mappings_changed = pyqtSignal(dict)
     
@@ -625,11 +625,11 @@ class KeyRemapperDialog(QDialog):
         self.update_all_bindings()
     
     def init_ui(self):
-        self.setWindowTitle("Key Remapper")
+        self.setWindowTitle("Настройка клавиш")
         self.setModal(True)
         self.setFixedSize(self.scaling.scale(900), self.scaling.scale(900))
         
-        #  Background coerente col launcher
+        # Фоновый цвет, согласованный с лаунчером
         self.setStyleSheet("""
             QDialog { 
                 background-color: #0f0f0f;
@@ -640,21 +640,21 @@ class KeyRemapperDialog(QDialog):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # === HEADER ===
+        # === ШАПКА ===
         header = self._create_header()
         main_layout.addWidget(header)
         
-        # === INFO BANNER ===
+        # === ИНФОРМАЦИОННЫЙ БАННЕР ===
         info_banner = self._create_info_banner()
         main_layout.addWidget(info_banner)
         
-        # === SCROLLABLE CONTENT ===
+        # === ОБЛАСТЬ ПРОКРУТКИ ===
         scroll = self._create_scroll_area()
         content = self._create_content()
         scroll.setWidget(content)
         main_layout.addWidget(scroll)
         
-        # === FOOTER ===
+        # === НИЖНЯЯ ПАНЕЛЬ (FOOTER) ===
         footer = self._create_footer()
         main_layout.addWidget(footer)
         
@@ -662,7 +662,7 @@ class KeyRemapperDialog(QDialog):
         self.update_focus()
     
     def _create_header(self):
-        """Header semplice senza bottone X"""
+        """Простая шапка без кнопки закрытия (крестика)"""
         header = QWidget()
         header.setFixedHeight(self.scaling.scale(140))
         header.setStyleSheet("""
@@ -681,15 +681,14 @@ class KeyRemapperDialog(QDialog):
             self.scaling.scale(25)
         )
         
-        # Titolo principale
-       # Container orizzontale per icona + titolo
+        # Горизонтальный контейнер для иконки и заголовка
         title_container = QWidget()
         title_container.setStyleSheet("background: transparent; border: none;")
         title_layout = QHBoxLayout(title_container)
         title_layout.setSpacing(self.scaling.scale(15))
         title_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Icona personalizzata
+        # Пользовательская иконка
         icon_label = QLabel()
         icon_path = Path("assets/icons/remote.png")
         if icon_path.exists():
@@ -713,8 +712,8 @@ class KeyRemapperDialog(QDialog):
             """)
         title_layout.addWidget(icon_label)
 
-        # Titolo principale (SENZA emoji ora)
-        title = QLabel("Key Remapper")
+        # Главный заголовок
+        title = QLabel("Настройка клавиш")
         title.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -730,8 +729,8 @@ class KeyRemapperDialog(QDialog):
 
         layout.addWidget(title_container)
         
-        # Sottotitolo
-        subtitle = QLabel("Customize your keyboard and remote control buttons")
+        # Подзаголовок
+        subtitle = QLabel("Настройте клавиатуру и кнопки пульта дистанционного управления")
         subtitle.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.5);
@@ -747,7 +746,7 @@ class KeyRemapperDialog(QDialog):
         return header
     
     def _create_info_banner(self):
-        """Banner informativo stile launcher"""
+        """Информационный баннер в стиле лаунчера"""
         banner = QWidget()
         banner.setFixedHeight(self.scaling.scale(90))
         banner.setStyleSheet("""
@@ -766,14 +765,14 @@ class KeyRemapperDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(20))
         
-        # Icona personalizzata keyboard
+        # Пользовательская иконка клавиатуры
         icon_label = QLabel()
         icon_label.setFixedSize(self.scaling.scale(36), self.scaling.scale(36))
         icon_path = Path("assets/icons/keyboard.png")
         if icon_path.exists():
             pixmap = QPixmap(str(icon_path))
             scaled_pixmap = pixmap.scaled(
-                self.scaling.scale(36),  # Leggermente più piccolo
+                self.scaling.scale(36),  # Немного меньше
                 self.scaling.scale(36),
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation
@@ -793,11 +792,11 @@ class KeyRemapperDialog(QDialog):
             """)
         layout.addWidget(icon_label)
         
-        # Testo informativo
+        # Информационный текст
         info_text = QLabel(
-            "<b style='color: white; font-size: 15px;'>Keyboard & Remote Mappings</b><br>"
+            "<b style='color: white; font-size: 15px;'>Раскладки клавиатуры и пульта</b><br>"
             "<span style='color: rgba(255,255,255,0.5); font-size: 13px;'>"
-            "Xbox/PlayStation controllers work out of the box"
+            "Контроллеры Xbox/PlayStation работают без дополнительной настройки"
             "</span>"
         )
         info_text.setStyleSheet("""
@@ -811,17 +810,17 @@ class KeyRemapperDialog(QDialog):
         
         layout.addStretch()
         
-        # Reset button con icona personalizzata
-        reset_btn = QPushButton(" Reset All")
+        # Кнопка сброса с кастомной иконкой
+        reset_btn = QPushButton(" Сбросить")
         reset_icon_path = Path("assets/icons/refresh.png")
         if reset_icon_path.exists():
             reset_btn.setIcon(QIcon(str(reset_icon_path)))
             from PyQt6.QtCore import QSize
             reset_btn.setIconSize(QSize(self.scaling.scale(20), self.scaling.scale(20)))
         else:
-            reset_btn.setText("🔄 Reset All")
+            reset_btn.setText("🔄 Сбросить")
 
-        reset_btn.setFixedSize(self.scaling.scale(120), self.scaling.scale(50))
+        reset_btn.setFixedSize(self.scaling.scale(140), self.scaling.scale(50))
         reset_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #2a2a2a;
@@ -846,7 +845,7 @@ class KeyRemapperDialog(QDialog):
         return banner
     
     def _create_scroll_area(self):
-        """Scroll area stile launcher"""
+        """Область прокрутки в стиле лаунчера"""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -878,7 +877,7 @@ class KeyRemapperDialog(QDialog):
         return scroll
     
     def _create_content(self):
-        """Content con sezioni categorizzate"""
+        """Контент с категориями разделов"""
         content = QWidget()
         content.setStyleSheet("background: #1a1a1a")
         
@@ -891,39 +890,39 @@ class KeyRemapperDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(25))
         
-        #  SEZIONI CATEGORIZZATE
+        # КАТЕГОРИЗИРОВАННЫЕ РАЗДЕЛЫ
         sections = [
-            (" Navigation", "Move around the interface", [
-                ('navigate_left', 'Navigate Left'),
-                ('navigate_right', 'Navigate Right'),
-                ('navigate_up', 'Navigate Up'),
-                ('navigate_down', 'Navigate Down'),
+            (" Навигация", "Перемещение по интерфейсу", [
+                ('navigate_left', 'Влево'),
+                ('navigate_right', 'Вправо'),
+                ('navigate_up', 'Вверх'),
+                ('navigate_down', 'Вниз'),
             ]),
-            (" Core Actions", "Essential app controls", [
-                ('launch', 'Launch App'),
-                ('back', 'Back / Cancel'),
-                ('edit', 'Edit App'),
-                ('delete', 'Delete App'),
+            (" Основные действия", "Основные элементы управления приложениями", [
+                ('launch', 'Запустить приложение'),
+                ('back', 'Назад / Отмена'),
+                ('edit', 'Изменить приложение'),
+                ('delete', 'Удалить приложение'),
             ]),
-            (" Features", "Advanced functionality", [
-                ('quick_search', 'Quick Search'),
-                ('reorder_mode', 'Reorder Mode'),
-                ('settings', 'Settings Menu'),
-                ('change_category', 'Change Category'),
+            (" Функции", "Расширенные возможности", [
+                ('quick_search', 'Быстрый поиск'),
+                ('reorder_mode', 'Режим сортировки'),
+                ('settings', 'Меню настроек'),
+                ('change_category', 'Изменить категорию'),
             ]),
         ]
         
         for section_icon, section_desc, actions in sections:
-            # Section header
+            # Шапка раздела
             section_header = self._create_section_header(section_icon, section_desc)
             layout.addWidget(section_header)
             
-            # Actions in this section
+            # Действия в этом разделе
             for action_id, action_name in actions:
                 action_row = self._create_action_row(action_id, action_name)
                 layout.addWidget(action_row)
             
-            # Spacer tra sezioni
+            # Отступ между секциями
             layout.addSpacing(self.scaling.scale(15))
         
         layout.addStretch()
@@ -931,7 +930,7 @@ class KeyRemapperDialog(QDialog):
         return content
     
     def _create_section_header(self, title, description):
-        """Section header semplice"""
+        """Простая шапка раздела"""
         header = QWidget()
         header.setFixedHeight(self.scaling.scale(60))
         header.setStyleSheet("background: transparent;")
@@ -940,7 +939,7 @@ class KeyRemapperDialog(QDialog):
         layout.setSpacing(self.scaling.scale(5))
         layout.setContentsMargins(0, 0, 0, 0)
         
-        # Titolo
+        # Заголовок
         title_label = QLabel(title)
         title_label.setStyleSheet(f"""
             QLabel {{
@@ -953,7 +952,7 @@ class KeyRemapperDialog(QDialog):
         """)
         layout.addWidget(title_label)
         
-        # Descrizione
+        # Описание
         desc_label = QLabel(description)
         desc_label.setStyleSheet(f"""
             QLabel {{
@@ -969,7 +968,7 @@ class KeyRemapperDialog(QDialog):
         return header
     
     def _create_action_row(self, action_id, action_name):
-        """Action row stile launcher (grigio)"""
+        """Строка действия в стиле лаунчера (серый фон)"""
         row = QWidget()
         row.setFixedHeight(self.scaling.scale(75))
         row.setStyleSheet(f"""
@@ -992,7 +991,7 @@ class KeyRemapperDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(15))
         
-        # Nome azione con hint
+        # Имя действия с подсказкой
         name_container = QWidget()
         name_container.setStyleSheet("background: transparent; border: none;")
         name_layout = QVBoxLayout(name_container)
@@ -1011,20 +1010,20 @@ class KeyRemapperDialog(QDialog):
         """)
         name_layout.addWidget(name_label)
         
-        # Hint subtitle
+        # Подзаголовок-подсказка
         hint_texts = {
-            'navigate_left': 'Move carousel left',
-            'navigate_right': 'Move carousel right',
-            'navigate_up': 'Go to menu',
-            'navigate_down': 'Open bottom menu',
-            'launch': 'Start selected app',
-            'back': 'Exit or cancel',
-            'edit': 'Modify app details',
-            'delete': 'Remove app',
-            'quick_search': 'Find apps quickly',
-            'reorder_mode': 'Rearrange apps',
-            'settings': 'Open settings panel',
-            'change_category': 'Quick category change',
+            'navigate_left': 'Перемещение карусели влево',
+            'navigate_right': 'Перемещение карусели вправо',
+            'navigate_up': 'Перейти в меню',
+            'navigate_down': 'Открыть нижнее меню',
+            'launch': 'Запустить выбранное приложение',
+            'back': 'Выход или отмена',
+            'edit': 'Изменить данные приложения',
+            'delete': 'Удалить приложение',
+            'quick_search': 'Быстрый поиск приложений',
+            'reorder_mode': 'Перестановка приложений',
+            'settings': 'Открыть панель настроек',
+            'change_category': 'Быстрое изменение категории',
         }
         
         hint_label = QLabel(hint_texts.get(action_id, ''))
@@ -1043,7 +1042,7 @@ class KeyRemapperDialog(QDialog):
         
         layout.addStretch()
         
-        # Current binding (badge stile launcher)
+        # Текущая привязка (значок в стиле лаунчера)
         binding_label = QLabel("...")
         binding_label.setFixedHeight(self.scaling.scale(40))
         binding_label.setMinimumWidth(self.scaling.scale(100))
@@ -1061,9 +1060,9 @@ class KeyRemapperDialog(QDialog):
         binding_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(binding_label)
         
-        # Change button stile launcher
-        change_btn = QPushButton("Change")
-        change_btn.setFixedSize(self.scaling.scale(100), self.scaling.scale(40))
+        # Кнопка изменения в стиле лаунчера
+        change_btn = QPushButton("Изменить")
+        change_btn.setFixedSize(self.scaling.scale(110), self.scaling.scale(40))
         change_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #3a3a3a;
@@ -1086,7 +1085,7 @@ class KeyRemapperDialog(QDialog):
         return row
     
     def _create_footer(self):
-        """Footer stile launcher"""
+        """Нижняя панель (футер) в стиле лаунчера"""
         footer = QWidget()
         footer.setFixedHeight(self.scaling.scale(100))
         footer.setStyleSheet("""
@@ -1105,8 +1104,8 @@ class KeyRemapperDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(20))
         
-        # Hint sinistra
-        hint = QLabel("Navigate: ↑↓  •  Select: Enter  •  Close: Esc")
+        # Подсказка слева
+        hint = QLabel("Навигация: ↑↓  •  Выбор: Enter  •  Закрыть: Esc")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.4);
@@ -1120,17 +1119,17 @@ class KeyRemapperDialog(QDialog):
         
         layout.addStretch()
         
-        # Save button stile launcher (NO gradiente)
-        save_btn = QPushButton(" Save and Close")
+        # Кнопка сохранения в стиле лаунчера (без градиента)
+        save_btn = QPushButton(" Сохранить и закрыть")
         save_icon_path = Path("assets/icons/backup.png")
         if save_icon_path.exists():
             save_btn.setIcon(QIcon(str(save_icon_path)))
             from PyQt6.QtCore import QSize
             save_btn.setIconSize(QSize(self.scaling.scale(24), self.scaling.scale(24)))
         else:
-            save_btn.setText("💾 Save and Close")
+            save_btn.setText("💾 Сохранить и закрыть")
         
-        save_btn.setFixedSize(self.scaling.scale(180), self.scaling.scale(55))
+        save_btn.setFixedSize(self.scaling.scale(230), self.scaling.scale(55))
         save_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #2a2a2a;
@@ -1157,15 +1156,15 @@ class KeyRemapperDialog(QDialog):
     
     
     def _reset_current_profile(self):
-        """Reset con feedback visivo"""
+        """Сброс с визуальным подтверждением"""
         self.mapper.reset_profile_to_default()
         self.update_all_bindings()
         self.mappings_changed.emit(self.mapper.get_current_mappings())
         
-        # Feedback visivo temporaneo
+        # Временный визуальный отклик
         if hasattr(self, 'reset_btn'):
             original_text = self.reset_btn.text()
-            self.reset_btn.setText("✓ Reset!")
+            self.reset_btn.setText("✓ Сброшено!")
             self.reset_btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: #3a3a3a;
@@ -1179,7 +1178,7 @@ class KeyRemapperDialog(QDialog):
             QTimer.singleShot(1500, lambda: self._restore_reset_button(original_text))
     
     def _restore_reset_button(self, original_text):
-        """Ripristina stile reset button"""
+        """Восстановление стиля кнопки сброса"""
         if hasattr(self, 'reset_btn'):
             self.reset_btn.setText(original_text)
             self.reset_btn.setStyleSheet(f"""
@@ -1197,7 +1196,7 @@ class KeyRemapperDialog(QDialog):
             """)
     
     def _remap_action(self, action_id, action_name):
-        """Apre dialog per rimappare"""
+        """Открытие диалога для переназначения"""
         dialog = KeyCaptureDialog(action_name, self.scaling, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             new_key = dialog.get_captured_key()
@@ -1207,7 +1206,7 @@ class KeyRemapperDialog(QDialog):
                 self.mappings_changed.emit(self.mapper.get_current_mappings())
     
     def update_all_bindings(self):
-        """Aggiorna tutti i binding"""
+        """Обновление всех привязок"""
         current_mappings = self.mapper.get_current_mappings()
         
         for action_id, (label, _) in self.action_buttons.items():
@@ -1216,27 +1215,27 @@ class KeyRemapperDialog(QDialog):
             label.setText(display_text)
     
     def _format_binding(self, binding):
-        """Format binding con icone"""
+        """Форматирование привязки с иконками"""
         if binding is None:
-            return "Not Set"
+            return "Не задано"
         
         if isinstance(binding, int):
             try:
                 binding = Qt.Key(binding)
             except:
-                return f"Key {binding}"
+                return f"Клавиша {binding}"
         
         if isinstance(binding, Qt.Key):
             special_keys = {
-                Qt.Key.Key_Left: "← Left",
-                Qt.Key.Key_Right: "→ Right",
-                Qt.Key.Key_Up: "↑ Up",
-                Qt.Key.Key_Down: "↓ Down",
+                Qt.Key.Key_Left: "← Влево",
+                Qt.Key.Key_Right: "→ Вправо",
+                Qt.Key.Key_Up: "↑ Вверх",
+                Qt.Key.Key_Down: "↓ Вниз",
                 Qt.Key.Key_Return: "⏎ Enter",
                 Qt.Key.Key_Enter: "⏎ Enter",
                 Qt.Key.Key_Escape: "⎋ Esc",
                 Qt.Key.Key_Delete: "⌫ Del",
-                Qt.Key.Key_Space: "␣ Space",
+                Qt.Key.Key_Space: "␣ Пробел",
                 Qt.Key.Key_F: "F",
                 Qt.Key.Key_R: "R",
                 Qt.Key.Key_S: "S",
@@ -1259,26 +1258,26 @@ class KeyRemapperDialog(QDialog):
                     name = name[4:]
                 return name.replace('_', ' ').title()
             except:
-                return f"Key {int(binding)}"
+                return f"Клавиша {int(binding)}"
         
         elif isinstance(binding, str):
             if binding.startswith('button_'):
                 btn_num = binding.split('_')[1]
-                return f"🎮 Btn {btn_num}"
+                return f"🎮 Кн. {btn_num}"
             elif binding.startswith('dpad_'):
                 direction = binding.split('_')[1].capitalize()
                 arrows = {'Up': '↑', 'Down': '↓', 'Left': '←', 'Right': '→'}
-                return f"{arrows.get(direction, '')} D-Pad"
+                return f"{arrows.get(direction, '')} Крестовина"
         
-        return "Unknown"
+        return "Неизвестно"
     
     def update_focus(self):
-        """Focus con bordo bianco stile launcher"""
+        """Фокус с белой рамкой в стиле лаунчера"""
         for i, item in enumerate(self.focusable_items):
             if i == self.current_index:
                 if isinstance(item, QPushButton):
-                    if "Reset" in item.text():
-                        # Reset button focused
+                    if "Сбросить" in item.text():
+                        # Фокус на кнопке сброса
                         item.setStyleSheet(f"""
                             QPushButton {{
                                 background-color: #3a3a3a;
@@ -1289,8 +1288,8 @@ class KeyRemapperDialog(QDialog):
                                 font-weight: bold;
                             }}
                         """)
-                    elif "Save" in item.text():
-                        # Save button focused
+                    elif "Сохранить" in item.text():
+                        # Фокус на кнопке сохранения
                         item.setStyleSheet(f"""
                             QPushButton {{
                                 background-color: #3a3a3a;
@@ -1302,7 +1301,7 @@ class KeyRemapperDialog(QDialog):
                             }}
                         """)
                     else:
-                        # Change button focused
+                        # Фокус на кнопке изменения
                         item.setStyleSheet(f"""
                             QPushButton {{
                                 background-color: #4a4a4a;
@@ -1314,9 +1313,9 @@ class KeyRemapperDialog(QDialog):
                             }}
                         """)
             else:
-                # Unfocused styles
+                # Стили без фокуса
                 if isinstance(item, QPushButton):
-                    if "Reset" in item.text():
+                    if "Сбросить" in item.text():
                         item.setStyleSheet(f"""
                             QPushButton {{
                                 background-color: #2a2a2a;
@@ -1330,7 +1329,7 @@ class KeyRemapperDialog(QDialog):
                                 background-color: #3a3a3a;
                             }}
                         """)
-                    elif "Save" in item.text():
+                    elif "Сохранить" in item.text():
                         item.setStyleSheet(f"""
                             QPushButton {{
                                 background-color: #2a2a2a;
@@ -1360,7 +1359,7 @@ class KeyRemapperDialog(QDialog):
                         """)
     
     def keyPressEvent(self, event):
-        """Navigation con tastiera"""
+        """Навигация с помощью клавиатуры"""
         if event.isAutoRepeat():
             return
         
@@ -1386,13 +1385,13 @@ class KeyRemapperDialog(QDialog):
             super().keyPressEvent(event)
     
     def _ensure_visible(self):
-        """Scroll automatico verso elemento focused"""
+        """Автоматическая прокрутка к активному элементу в фокусе"""
         if not self.focusable_items or self.current_index >= len(self.focusable_items):
             return
         
         current_item = self.focusable_items[self.current_index]
         
-        # Trova scroll area
+        # Находим область прокрутки (scroll area)
         scroll_area = None
         parent = current_item.parent()
         while parent:
@@ -1404,7 +1403,7 @@ class KeyRemapperDialog(QDialog):
         if not scroll_area:
             return
         
-        # Calcola posizione
+        # Вычисляем позицию
         item_y = 0
         widget = current_item
         scroll_content = scroll_area.widget()
@@ -1426,10 +1425,11 @@ class KeyRemapperDialog(QDialog):
         item_bottom = item_y + item_height
         padding = self.scaling.scale(50)
         
-        # Scrolla se necessario
+        # Прокручиваем при необходимости
         if item_bottom + padding > visible_bottom:
             new_scroll = item_bottom - viewport_height + padding
             scrollbar.setValue(int(new_scroll))
         elif item_top - padding < visible_top:
             new_scroll = item_top - padding
             scrollbar.setValue(int(new_scroll))
+
