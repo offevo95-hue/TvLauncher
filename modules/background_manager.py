@@ -7,57 +7,57 @@ from PyQt6.QtGui import QPixmap, QBrush
 
 
 class BackgroundManager:
-    """Gestisce background, animazioni e auto-change wallpaper"""
+    """Управление фоном, анимациями и автоматической сменой обоев"""
     
     def __init__(self, parent, config_data, assets_dir):
         """
-        Inizializza il Background Manager
+        Инициализация менеджреа фона
         
         Args:
-            parent: La finestra principale (TVLauncher)
-            config_data: Dict con configurazione (background, auto_change_wallpaper)
-            assets_dir: Path alla cartella assets
+            parent: Главное окно (TVLauncher)
+            config_data: Словарь с конфигурацией (background, auto_change_wallpaper)
+            assets_dir: Путь к папке активов (assets)
         """
         self.parent = parent
         self.assets_dir = Path(assets_dir)
         
-        # Configurazione
+        # Конфигурация
         self.background_image = config_data.get('background', '')
         self.auto_change_wallpaper = config_data.get('auto_change_wallpaper', False)
-        self.wallpaper_interval = 300000  # 3 minuti default (in millisecondi)
+        self.wallpaper_interval = 300000  # 3 минуты по умолчанию (в миллисекундах)
         
-        # Cartella wallpapers
+        # Папка с обоями
         self.wallpaper_folder = self.assets_dir / 'wallpapers'
         self.wallpaper_folder.mkdir(parents=True, exist_ok=True)
         
-        # Animazioni
+        # Анимации
         self.fade_widget = None
         self.fade_animation = None
         self.pending_background = None
         
-        # Timer per auto-change
+        # Таймер для автосмены
         self.wallpaper_timer = None
         
     def initialize(self, overlay=None):
         """
-        Inizializza il background
+        Инициализация фона
         
         Args:
-            overlay: Widget overlay da tenere in considerazione per lo stacking
+            overlay: Виджет оверлея для учета порядка отрисовки (z-order)
         """
         self.overlay = overlay
         self.update_background(fade=False)
         
-        # Avvia auto-change se abilitato
+        # Запуск автосмены, если она включена
         if self.auto_change_wallpaper:
             self.start_wallpaper_rotation()
     
     def update_background(self, fade=False):
         """
-        Aggiorna lo sfondo della finestra
+        Обновление фонового изображения окна
         
         Args:
-            fade: Se True, applica transizione fade
+            fade: Если True, применяется плавная анимация затухания (fade)
         """
         if self.background_image and Path(self.background_image).exists():
             if fade:
@@ -65,7 +65,7 @@ class BackgroundManager:
             else:
                 self._set_scaled_background(self.background_image)
         else:
-            # Default: usa uno sfondo dalla cartella assets/wallpapers
+            # По умолчанию: использование фона из папки assets/wallpapers
             default_wallpaper = self.wallpaper_folder / 'default.jpg'
             if default_wallpaper.exists():
                 if fade:
@@ -73,11 +73,11 @@ class BackgroundManager:
                 else:
                     self._set_scaled_background(str(default_wallpaper))
             else:
-                # Fallback: sfondo grigio scuro
+                # Резервный вариант (fallback): темно-серый фон
                 self._set_fallback_background()
     
     def _set_fallback_background(self):
-        """Applica sfondo di fallback quando non ci sono immagini"""
+        """Применение резервного фона при отсутствии изображений"""
         self.parent.setStyleSheet("""
             QMainWindow {
                 background-color: #2a2a2a;
@@ -86,24 +86,21 @@ class BackgroundManager:
         if self.overlay:
             self.overlay.setStyleSheet("background-color: transparent;")
 
-    # ==================== COORDINAMENTO CON VIDEO WALLPAPER ====================
+    # ==================== КООРДИНАЦИЯ С ВИДЕООБОЯМИ ====================
     #
-    # Quando il video wallpaper è attivo, non deve esistere NESSUNA immagine
-    # statica: il video occupa esattamente lo stesso "layer" (il paint di
-    # sfondo della QMainWindow), non un layer separato che deve competere in
-    # z-order con lui. Il widget video (QWindowContainer, lower()) viene
-    # disegnato SEMPRE sopra il paint di sfondo della finestra e SOTTO ai
-    # widget figli più recenti (tiles/menu) per via del normale modello di
-    # paint di Qt — quindi basta che qui non ci sia nessuna immagine a
-    # "sporcare" quello stesso spazio.
+    # Когда видеообои активны, не должно быть НИКАКИХ статических изображений:
+    # видео занимает ровно тот же «слой» (отрисовку фона QMainWindow), а не отдельный слой,
+    # конкурирующий с ним по z-порядку. Видеовиджет (QWindowContainer, lower()) всегда
+    # отрисовывается поверх фоновой заливки окна и ПОД дочерними виджетами верхнего уровня
+    # (плитками/меню) в соответствии со стандартной моделью рисования Qt — поэтому здесь
+    # просто не должно быть никаких картинок, «засоряющих» это пространство.
 
     def suspend_for_video(self):
-        """Sospende lo sfondo statico mentre il video wallpaper è attivo.
+        """Приостановка статического фона на время работы видеообоев.
 
-        Il video è un QLabel figlio della QMainWindow (stesso meccanismo del
-        fade_widget statico), non una finestra separata: niente trasparenza
-        di finestra, niente hack DWM. Qui basta non lasciare in giro
-        un'immagine statica che competa nello stesso spazio.
+        Видео представляет собой дочерний QLabel для QMainWindow (тот же механизм,
+        что и статический fade_widget), а не отдельное окно: без прозрачности окна,
+        без хаков DWM. Здесь достаточно просто убрать статическую картинку.
         """
         self.stop_wallpaper_rotation()
         if self.fade_animation and self.fade_animation.state() == QPropertyAnimation.State.Running:
@@ -112,71 +109,71 @@ class BackgroundManager:
             self.fade_widget.hide()
 
     def resume_after_video(self):
-        """Ripristina lo sfondo statico (con fade) quando il video wallpaper
-        viene disattivato."""
+        """Восстановление статического фона (с эффектом fade) после отключения
+        видеообоев."""
         self.update_background(fade=True)
         if self.auto_change_wallpaper:
             self.start_wallpaper_rotation()
     
     def _fade_to_background(self, image_path):
         """
-        Transizione fade verso un nuovo sfondo
+        Плавный переход к новому фону (эффект fade)
         
         Args:
-            image_path: Percorso dell'immagine da caricare
+            image_path: Путь к загружаемому изображению
         """
-        # Se c'è già una transizione in corso, completala immediatamente
+        # Если переход уже выполняется, завершить его немедленно
         if self.fade_animation and self.fade_animation.state() == QPropertyAnimation.State.Running:
             self.fade_animation.stop()
             if self.fade_widget:
                 self.fade_widget.deleteLater()
                 self.fade_widget = None
         
-        # Crea widget per il nuovo sfondo
+        # Создание виджета для нового фона
         screen = QApplication.primaryScreen().geometry()
         self.fade_widget = QLabel(self.parent)
         self.fade_widget.setGeometry(0, 0, screen.width(), screen.height())
         self.fade_widget.setScaledContents(True)
         
-        # Carica e scala l'immagine
+        # Загрузка и масштабирование изображения
         pixmap = QPixmap(image_path)
         scaled_pixmap = self._scale_pixmap_to_screen(pixmap, screen)
         self.fade_widget.setPixmap(scaled_pixmap)
         
-        # Posiziona sotto l'overlay ma sopra lo sfondo
+        # Размещение под оверлеем, но поверх основного фона
         self.fade_widget.lower()
         if self.overlay:
             self.fade_widget.stackUnder(self.overlay)
         
-        # Crea effetto opacità
+        # Создание эффекта прозрачности
         opacity_effect = QGraphicsOpacityEffect()
         opacity_effect.setOpacity(0)
         self.fade_widget.setGraphicsEffect(opacity_effect)
         
         self.fade_widget.show()
         
-        # Salva il percorso per applicarlo dopo il fade
+        # Сохранение пути для применения после завершения анимации
         self.pending_background = image_path
         
-        # Anima l'opacità da 0 a 1
+        # Анимация прозрачности от 0 до 1
         self.fade_animation = QPropertyAnimation(opacity_effect, b"opacity")
-        self.fade_animation.setDuration(800)  # 800ms - dissolvenza fluida
+        self.fade_animation.setDuration(800)  # 800мс — плавная растворяющаяся анимация
         self.fade_animation.setStartValue(0.0)
         self.fade_animation.setEndValue(1.0)
         self.fade_animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
         
-        # Quando finisce l'animazione, applica lo sfondo reale
+        # Применение реального фона по окончании анимации
         self.fade_animation.finished.connect(self._on_fade_finished)
         self.fade_animation.start()
     
     def _on_fade_finished(self):
-        """Chiamato quando la transizione fade è completata"""
-        # Applica lo sfondo reale
+        """Вызывается по завершении анимации перехода"""
+        # Применение настоящего фона
         if self.pending_background:
             self._set_scaled_background(self.pending_background)
             self.pending_background = None
         
-        # Rimuovi il widget di transizione
+        # Удаление вспомогательного виджета перехода
         if self.fade_widget:
             self.fade_widget.deleteLater()
             self.fade_widget = None
@@ -185,39 +182,39 @@ class BackgroundManager:
     
     def _set_scaled_background(self, image_path):
         """
-        Imposta uno sfondo scalato per riempire la finestra
+        Установка масштабированного фона для заполнения окна
         
         Args:
-            image_path: Percorso dell'immagine
+            image_path: Путь к изображению
         """
         screen = QApplication.primaryScreen().geometry()
         pixmap = QPixmap(image_path)
         
-        # Scala il pixmap per riempire lo schermo
+        # Масштабирование пиксмапа для заполнения экрана
         scaled_pixmap = self._scale_pixmap_to_screen(pixmap, screen)
         
-        # Applica lo sfondo usando QPalette
+        # Установка фона через QPalette
         palette = self.parent.palette()
         brush = QBrush(scaled_pixmap)
         palette.setBrush(self.parent.backgroundRole(), brush)
         self.parent.setPalette(palette)
         
-        # Applica overlay scuro per migliorare leggibilità
+        # Применение темного оверлея для улучшения читаемости
         if self.overlay:
             self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.3);")
     
     def _scale_pixmap_to_screen(self, pixmap, screen):
         """
-        Scala un pixmap per riempire lo schermo (cover mode)
+        Масштабирование изображения под размер экрана (режим cover)
         
         Args:
-            pixmap: QPixmap da scalare
-            screen: QRect con dimensioni dello schermo
+            pixmap: QPixmap для масштабирования
+            screen: QRect с размерами экрана
             
         Returns:
-            QPixmap scalato e centrato
+            Масштабированный и откадрированный по центру QPixmap
         """
-        # Scala il pixmap per riempire lo schermo (equivalente di background-size: cover)
+        # Масштабирование с заполнением экрана (эквивалент background-size: cover)
         scaled_pixmap = pixmap.scaled(
             screen.width(), 
             screen.height(),
@@ -225,7 +222,7 @@ class BackgroundManager:
             Qt.TransformationMode.SmoothTransformation
         )
         
-        # Centra il pixmap se è più grande dello schermo
+        # Центрирование изображения, если оно больше экрана
         if scaled_pixmap.width() > screen.width() or scaled_pixmap.height() > screen.height():
             x = (scaled_pixmap.width() - screen.width()) // 2
             y = (scaled_pixmap.height() - screen.height()) // 2
@@ -233,64 +230,61 @@ class BackgroundManager:
         
         return scaled_pixmap
     
-    # ==================== GESTIONE WALLPAPER ====================
+    # ==================== УПРАВЛЕНИЕ ОБОЯМИ ====================
     
     def set_background_from_dialog(self):
         """
-        Apre dialog per scegliere sfondo manualmente
+        Открытие диалогового окна для ручного выбора фона
         
         Returns:
-            bool: True se sfondo cambiato, False altrimenti
+            bool: True, если фон был изменен, иначе False
         """
         file_path, _ = QFileDialog.getOpenFileName(
             self.parent,
-            "Select Background Image",
+            "Выбрать фоновое изображение",
             "",
-            "Images (*.png *.jpg *.jpeg *.bmp);;All Files (*.*)"
+            "Изображения (*.png *.jpg *.jpeg *.bmp);;Все файлы (*.*)"
         )
         
         if file_path:
             self.background_image = file_path
             
-            # Disattiva il cambio automatico quando si sceglie uno sfondo manuale
+            # Отключение автосмены при ручном выборе фона
             if self.auto_change_wallpaper:
                 self.auto_change_wallpaper = False
                 self.stop_wallpaper_rotation()
                 
-            
             self.update_background(fade=True)
             return True
         
         return False
     
     def start_wallpaper_rotation(self):
-        """Avvia il timer per il cambio automatico dello sfondo"""
+        """Запуск таймера для автоматической смены фоновых изображений"""
         if not self.auto_change_wallpaper:
             return
             
-        # Cambia subito con fade
+        # Смена изображения сразу с эффектом fade
         self.change_random_wallpaper()
         
-        # Avvia timer
+        # Запуск таймера
         self.wallpaper_timer = QTimer()
         self.wallpaper_timer.timeout.connect(self.change_random_wallpaper)
         self.wallpaper_timer.start(self.wallpaper_interval)
         
-    
     def stop_wallpaper_rotation(self):
-        """Ferma il timer per il cambio automatico dello sfondo"""
+        """Остановка таймера автоматической смены обоев"""
         if self.wallpaper_timer:
             self.wallpaper_timer.stop()
             self.wallpaper_timer = None
             
-    
     def change_random_wallpaper(self):
-        """Cambia lo sfondo con uno casuale dalla cartella"""
+        """Смена фона на случайный из папки"""
         if not self.wallpaper_folder.exists():
-            print(f"⚠️ Wallpaper folder not found: {self.wallpaper_folder}")
+            print(f"⚠️ Папка с обоями не найдена: {self.wallpaper_folder}")
             return
         
-        # Trova tutti i file immagine
+        # Поиск всех файлов изображений
         wallpapers = (
             list(self.wallpaper_folder.glob("*.jpg")) + 
             list(self.wallpaper_folder.glob("*.png")) + 
@@ -298,27 +292,26 @@ class BackgroundManager:
         )
         
         if not wallpapers:
-            print(f"⚠️ No wallpapers found in {self.wallpaper_folder}")
+            print(f"⚠️ Обои не найдены в папке {self.wallpaper_folder}")
             return
         
-        # Scegli uno sfondo casuale (evitando quello corrente se possibile)
+        # Выбор случайного фона (по возможности исключая текущий)
         if len(wallpapers) > 1 and self.background_image:
             current = Path(self.background_image)
             wallpapers = [w for w in wallpapers if w != current]
         
         random_wallpaper = random.choice(wallpapers)
         
-        # Imposta lo sfondo con fade
+        # Установка фона с эффектом fade
         self.background_image = str(random_wallpaper)
         self.update_background(fade=True)
         
-    
     def toggle_wallpaper_rotation(self, enabled):
         """
-        Attiva/disattiva il cambio automatico sfondo
+        Включение/выключение автоматической смены обоев
         
         Args:
-            enabled: True per attivare, False per disattivare
+            enabled: True для включения, False для выключения
         """
         self.auto_change_wallpaper = enabled
         
@@ -329,26 +322,26 @@ class BackgroundManager:
     
     def set_wallpaper_interval(self, interval_seconds):
         """
-        Imposta l'intervallo di cambio wallpaper
+        Установка интервала смены обоев
         
         Args:
-            interval_seconds: Intervallo in secondi
+            interval_seconds: Интервал в секундах
         """
-        self.wallpaper_interval = interval_seconds * 1000  # Converti in millisecondi
+        self.wallpaper_interval = interval_seconds * 1000  # Конвертация в миллисекунды
         
-        # Riavvia timer se attivo
+        # Перезапуск таймера, если он активен
         if self.wallpaper_timer and self.wallpaper_timer.isActive():
             self.stop_wallpaper_rotation()
             self.start_wallpaper_rotation()
     
-    # ==================== CONFIGURAZIONE ====================
+    # ==================== КОНФИГУРАЦИЯ ====================
     
     def get_config(self):
         """
-        Ritorna la configurazione corrente
+        Получение текущей конфигурации
         
         Returns:
-            dict: Configurazione background
+            dict: Словарь с конфигурацией фона
         """
         return {
             'background': self.background_image,
@@ -358,50 +351,50 @@ class BackgroundManager:
     
     def load_config(self, config_data):
         """
-        Carica configurazione
+        Загрузка конфигурации
         
         Args:
-            config_data: Dict con configurazione
+            config_data: Словарь с конфигурацией
         """
         self.background_image = config_data.get('background', '')
         self.auto_change_wallpaper = config_data.get('auto_change_wallpaper', False)
         self.wallpaper_interval = config_data.get('wallpaper_interval', 180000)
     
-    # ==================== CLEANUP ====================
+    # ==================== ОЧИСТКА РЕСУРСОВ ====================
     
     def cleanup(self):
-        """Pulisce risorse quando si chiude l'applicazione"""
+        """Очистка ресурсов при закрытии приложения"""
         self.stop_wallpaper_rotation()
         
-        # Ferma animazioni in corso
+        # Остановка выполняющихся анимаций
         if self.fade_animation and self.fade_animation.state() == QPropertyAnimation.State.Running:
             self.fade_animation.stop()
         
-        # Rimuovi widget di fade
+        # Удаление виджета затухания
         if self.fade_widget:
             self.fade_widget.deleteLater()
             self.fade_widget = None
 
 
-# ==================== FUNZIONI DI INTEGRAZIONE ====================
+# ==================== ФУНКЦИИ ИНТЕГРАЦИИ ====================
 
 def integrate_background_manager(launcher_class):
     """
-    Integra il BackgroundManager nella classe TVLauncher
+    Интеграция BackgroundManager в класс TVLauncher
     
     Args:
-        launcher_class: La classe TVLauncher da modificare
+        launcher_class: Изменяемый класс TVLauncher
     """
     
-    # Salva __init__ originale
+    # Сохранение оригинального конструктора __init__
     original_init = launcher_class.__init__
     
     def new_init(self):
-        """Nuovo __init__ con BackgroundManager"""
-        # Chiama init originale
+        """Новый метод __init__ с инициализацией BackgroundManager"""
+        # Вызов оригинального init
         original_init(self)
         
-        # Inizializza BackgroundManager
+        # Инициализация BackgroundManager
         from modules.background_manager import BackgroundManager
         self.background_manager = BackgroundManager(
             parent=self,
@@ -409,10 +402,10 @@ def integrate_background_manager(launcher_class):
             assets_dir=self.assets_dir
         )
         
-        # Inizializza background (chiamare dopo aver creato overlay)
+        # Инициализация фона (вызывается после создания оверлея)
         # self.background_manager.initialize(overlay=self.overlay)
     
-    # Sostituisci metodi
+    # Подмена методов класса
     launcher_class.__init__ = new_init
     launcher_class.set_background = lambda self: self.background_manager.set_background_from_dialog()
     launcher_class.update_background = lambda self, fade=False: self.background_manager.update_background(fade)
@@ -421,11 +414,11 @@ def integrate_background_manager(launcher_class):
     launcher_class.change_random_wallpaper = lambda self: self.background_manager.change_random_wallpaper()
     launcher_class.toggle_wallpaper_rotation = lambda self, enabled: self.background_manager.toggle_wallpaper_rotation(enabled)
     
-    # Aggiungi cleanup
+    # Добавление очистки ресурсов в closeEvent
     original_close = launcher_class.closeEvent if hasattr(launcher_class, 'closeEvent') else None
     
     def new_close_event(self, event):
-        """Cleanup prima di chiudere"""
+        """Очистка перед закрытием приложения"""
         if hasattr(self, 'background_manager'):
             self.background_manager.cleanup()
         
@@ -435,3 +428,4 @@ def integrate_background_manager(launcher_class):
             event.accept()
     
     launcher_class.closeEvent = new_close_event
+
