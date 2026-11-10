@@ -1,11 +1,11 @@
 """
-styles.py — TV Launcher Stylesheet Constants
+styles.py — Константы таблиц стилей (Stylesheet) для TV Launcher
 =============================================
-Tutte le stringhe CSS estratte da tvlauncher.py.
-Le costanti statiche (senza scaling) sono stringhe dirette.
-Le funzioni generano stili che dipendono da valori scalati a runtime.
+Все строки CSS извлечены из tvlauncher.py.
+Статические константы (без масштабирования) являются обычными строками.
+Функции генерируют стили, которые зависят от значений, масштабируемых во время выполнения (runtime).
 
-USO:
+ИСПОЛЬЗОВАНИЕ:
     from modules.styles import Styles
 
     widget.setStyleSheet(Styles.MSGBOX)
@@ -15,46 +15,40 @@ USO:
 
 class Styles:
 
-    
-    # Generici / layout
-    
+  # Общие / layout
 
-    TRANSPARENT = "background-color: transparent;"
+  TRANSPARENT = "background-color: transparent;"
 
-    OVERLAY_DIM = "background-color: rgba(0, 0, 0, 0.3);"
+  OVERLAY_DIM = "background-color: rgba(0, 0, 0, 0.3);"
 
-    SEPARATOR = "background-color: rgba(255,255,255,0.2); border: none;"
+  SEPARATOR = "background-color: rgba(255,255,255,0.2); border: none;"
 
-    EMPTY_LABEL = "color: #666; font-size: 18px;"
+  EMPTY_LABEL = "color: #666; font-size: 18px;"
 
-    
-    # Orologio (header)
-    
+  # Часы (хедер / шапка)
 
-    @staticmethod
-    def clock_time(font_size: int) -> str:
-        return (
-            f"color: rgba(255, 255, 255, 0.9); "
-            f"font-size: {font_size}px; "
-            f"font-weight: 700;"
-        )
+  @staticmethod
+  def clock_time(font_size: int) -> str:
+    return (
+        f"color: rgba(255, 255, 255, 0.9); "
+        f"font-size: {font_size}px; "
+        f"font-weight: 700;"
+    )
 
-    @staticmethod
-    def clock_date(font_size: int) -> str:
-        return (
-            f"color: rgba(255, 255, 255, 0.6); "
-            f"font-size: {font_size}px; "
-            f"font-weight: 500;"
-        )
+  @staticmethod
+  def clock_date(font_size: int) -> str:
+    return (
+        f"color: rgba(255, 255, 255, 0.6); "
+        f"font-size: {font_size}px; "
+        f"font-weight: 500;"
+    )
 
-    
-    # Settings button (⚙) — due varianti
-    
+  # Кнопка настроек (⚙) — два варианта
 
-    @staticmethod
-    def settings_btn_standalone(border_radius: int, font_size: int) -> str:
-        """Versione senza batteria: pulsante standalone con sfondo overlay."""
-        return f"""
+  @staticmethod
+  def settings_btn_standalone(border_radius: int, font_size: int) -> str:
+    """Версия без батареи: отдельная кнопка с фоном-оверлеем."""
+    return f"""
             QPushButton {{
                 background-color: rgba(255, 255, 255, 0.1);
                 color: rgba(255, 255, 255, 0.8);
@@ -68,10 +62,10 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def settings_btn_in_pill(border_radius: int, font_size: int) -> str:
-        """Versione con batteria: ingranaggio dentro la pill, sfondo trasparente."""
-        return f"""
+  @staticmethod
+  def settings_btn_in_pill(border_radius: int, font_size: int) -> str:
+    """Версия с батареей: шестеренка внутри пилюли, прозрачный фон."""
+    return f"""
             QPushButton {{
                 background-color: transparent;
                 color: rgba(255, 255, 255, 0.8);
@@ -85,33 +79,32 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def pill_with_battery(border_radius: int) -> str:
-        """Contenitore pill batteria + ingranaggio."""
-        return f"""
+  @staticmethod
+  def pill_with_battery(border_radius: int) -> str:
+    """Контейнер «пилюля» (батарея + шестеренка)."""
+    return f"""
             QWidget {{
                 background-color: rgba(255, 255, 255, 0.1);
                 border-radius: {border_radius}px;
             }}
         """
 
-    
-    # Menu bar inferiore
-    
+  # Нижняя панель меню
 
-    @staticmethod
-    def menu_bar_container(border_radius: int) -> str:
-        return f"""
+  @staticmethod
+  def menu_bar_container(border_radius: int) -> str:
+    return f"""
             QWidget {{
                 background-color: rgba(20, 20, 20, 0.6);
                 border-radius: {border_radius}px;
             }}
         """
 
-    @staticmethod
-    def menu_btn_normal(border: int, border_radius: int,
-                        font_size: int, weight: str = "500") -> str:
-        return f"""
+  @staticmethod
+  def menu_btn_normal(
+      border: int, border_radius: int, font_size: int, weight: str = "500"
+  ) -> str:
+    return f"""
             QPushButton {{
                 background-color: rgba(255, 255, 255, 0.1);
                 color: rgba(255, 255, 255, 0.7);
@@ -123,9 +116,11 @@ class Styles:
             QPushButton:hover {{ background-color: #3a3a3a; }}
         """
 
-    @staticmethod
-    def menu_btn_focused(border: int, border_radius: int, font_size: int) -> str:
-        return f"""
+  @staticmethod
+  def menu_btn_focused(
+      border: int, border_radius: int, font_size: int
+  ) -> str:
+    return f"""
             QPushButton {{
                 background-color: rgba(255, 255, 255, 0.95);
                 color: #000000;
@@ -137,25 +132,21 @@ class Styles:
             QPushButton:hover {{ background-color: #3a3a3a; }}
         """
 
-    
-    # Istruzioni in basso
-    
+  # Инструкции в нижней части экрана
 
-    @staticmethod
-    def instructions(font_size: int) -> str:
-        return (
-            f"color: rgba(255, 255, 255, 0.3); "
-            f"font-size: {font_size}px; "
-            f"background: transparent;"
-        )
+  @staticmethod
+  def instructions(font_size: int) -> str:
+    return (
+        f"color: rgba(255, 255, 255, 0.3); "
+        f"font-size: {font_size}px; "
+        f"background: transparent;"
+    )
 
-    
-    # AppTile
-    
+  # Плитка приложения (AppTile)
 
-    @staticmethod
-    def tile_image_normal(border_radius: int, font_size: int) -> str:
-        return f"""
+  @staticmethod
+  def tile_image_normal(border_radius: int, font_size: int) -> str:
+    return f"""
             QLabel {{
                 background-color: #1a1a1a;
                 border-radius: {border_radius}px;
@@ -165,9 +156,11 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def tile_image_focused(border: int, border_radius: int, font_size: int) -> str:
-        return f"""
+  @staticmethod
+  def tile_image_focused(
+      border: int, border_radius: int, font_size: int
+  ) -> str:
+    return f"""
             QLabel {{
                 background-color: #1a1a1a;
                 border: {border}px solid #ffffff;
@@ -178,9 +171,9 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def tile_name_normal(font_size: int) -> str:
-        return f"""
+  @staticmethod
+  def tile_name_normal(font_size: int) -> str:
+    return f"""
             QLabel {{
                 color: #999999;
                 font-size: {font_size}px;
@@ -189,9 +182,9 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def tile_name_focused(font_size: int) -> str:
-        return f"""
+  @staticmethod
+  def tile_name_focused(font_size: int) -> str:
+    return f"""
             QLabel {{
                 color: #ffffff;
                 font-size: {font_size}px;
@@ -199,11 +192,9 @@ class Styles:
             }}
         """
 
-    
-    # QMessageBox 
-    
+  # QMessageBox (диалоговое окно сообщений)
 
-    MSGBOX = """
+  MSGBOX = """
         QMessageBox {
             background-color: #1a1a1a;
             color: white;
@@ -232,11 +223,16 @@ class Styles:
         }
     """
 
-    @staticmethod
-    def msgbox(font_size_label: int, font_size_btn: int,
-               padding_v: int, padding_h: int,
-               border_radius: int, min_width: int) -> str:
-        return f"""
+  @staticmethod
+  def msgbox(
+      font_size_label: int,
+      font_size_btn: int,
+      padding_v: int,
+      padding_h: int,
+      border_radius: int,
+      min_width: int,
+  ) -> str:
+    return f"""
             QMessageBox {{
                 background-color: #1a1a1a;
                 color: white;
@@ -265,11 +261,9 @@ class Styles:
             }}
         """
 
-    
-    # QProgressDialog
-    
+  # QProgressDialog (диалог прогресса)
 
-    PROGRESS_DIALOG = """
+  PROGRESS_DIALOG = """
         QProgressDialog {
             background-color: #1a1a1a;
             color: white;
@@ -300,10 +294,15 @@ class Styles:
         QPushButton:hover { background-color: #3a3a3a; }
     """
 
-    @staticmethod
-    def progress_dialog(font_size_label: int, font_size_btn: int,
-                        padding_v: int, padding_h: int, border_radius: int) -> str:
-        return f"""
+  @staticmethod
+  def progress_dialog(
+      font_size_label: int,
+      font_size_btn: int,
+      padding_v: int,
+      padding_h: int,
+      border_radius: int,
+  ) -> str:
+    return f"""
             QProgressDialog {{
                 background-color: #1a1a1a;
                 color: white;
@@ -334,14 +333,17 @@ class Styles:
             QPushButton:hover {{ background-color: #3a3a3a; }}
         """
 
-    
-    # Confirm dialog (confirm_action / confirm_exit_launcher)
-    
+  # Диалог подтверждения (confirm_action / confirm_exit_launcher)
 
-    @staticmethod
-    def confirm_dialog(font_size_label: int, font_size_btn: int,
-                       padding_v: int, padding_h: int, border_radius: int) -> str:
-        return f"""
+  @staticmethod
+  def confirm_dialog(
+      font_size_label: int,
+      font_size_btn: int,
+      padding_v: int,
+      padding_h: int,
+      border_radius: int,
+  ) -> str:
+    return f"""
             QDialog {{ background-color: #1a1a1a; }}
             QLabel {{ color: white; font-size: {font_size_label}px; }}
             QPushButton {{
@@ -359,10 +361,11 @@ class Styles:
             }}
         """
 
-    @staticmethod
-    def confirm_btn_focused(font_size: int, padding_v: int,
-                            padding_h: int, border_radius: int) -> str:
-        return f"""
+  @staticmethod
+  def confirm_btn_focused(
+      font_size: int, padding_v: int, padding_h: int, border_radius: int
+  ) -> str:
+    return f"""
             QPushButton {{
                 background-color: #2a2a2a;
                 color: white;
@@ -375,10 +378,11 @@ class Styles:
             QPushButton:hover {{ background-color: #3a3a3a; }}
         """
 
-    @staticmethod
-    def confirm_btn_normal(font_size: int, padding_v: int,
-                           padding_h: int, border_radius: int) -> str:
-        return f"""
+  @staticmethod
+  def confirm_btn_normal(
+      font_size: int, padding_v: int, padding_h: int, border_radius: int
+  ) -> str:
+    return f"""
             QPushButton {{
                 background-color: #2a2a2a;
                 color: white;
@@ -391,8 +395,8 @@ class Styles:
             QPushButton:hover {{ background-color: #3a3a3a; }}
         """
 
-    # Alias statici — usati da moduli esterni che non passano scaling
-    CONFIRM_DIALOG = """
+  # Статические алиасы — используются внешними модулями, которые не передают масштабирование
+  CONFIRM_DIALOG = """
         QDialog { background-color: #1a1a1a; }
         QLabel { color: white; font-size: 16px; }
         QPushButton {
@@ -410,7 +414,7 @@ class Styles:
         }
     """
 
-    CONFIRM_BTN_FOCUSED = """
+  CONFIRM_BTN_FOCUSED = """
         QPushButton {
             background-color: #2a2a2a;
             color: white;
@@ -423,7 +427,7 @@ class Styles:
         QPushButton:hover { background-color: #3a3a3a; }
     """
 
-    CONFIRM_BTN_NORMAL = """
+  CONFIRM_BTN_NORMAL = """
         QPushButton {
             background-color: #2a2a2a;
             color: white;
@@ -436,11 +440,9 @@ class Styles:
         QPushButton:hover { background-color: #3a3a3a; }
     """
 
-    
-    # Remove app messagebox 
-    
+  # Диалоговое окно удаления приложения
 
-    MSGBOX_REMOVE = """
+  MSGBOX_REMOVE = """
         QMessageBox {
             background-color: #2b2b2b;
             color: #ffffff;
@@ -457,3 +459,4 @@ class Styles:
         QPushButton:hover { background-color: #505050; }
         QPushButton:pressed { background-color: #1e90ff; }
     """
+
