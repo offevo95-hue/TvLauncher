@@ -1,6 +1,6 @@
 """
-Program Scanner Module
-Handles scanning installed programs and displaying them in a dialog
+Модуль сканирования программ
+Управление сканированием установленных программ и их отображение в диалоговом окне
 """
 
 import os
@@ -15,7 +15,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize, QFileInfo
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QFileIconProvider
 
-# Detect OS
+# Определение операционной системы
 IS_WINDOWS = platform.system() == "Windows"
 
 if IS_WINDOWS:
@@ -23,7 +23,7 @@ if IS_WINDOWS:
 
 
 class ProgramScanner(QThread):
-    """Background thread per scansionare i programmi installati CON icone"""
+    """Фоновый поток для сканирования установленных программ С иконками"""
     program_found = pyqtSignal(dict)
     scan_complete = pyqtSignal()
     progress_update = pyqtSignal(str)
@@ -32,7 +32,7 @@ class ProgramScanner(QThread):
         super().__init__()
     
     def _extract_icon_from_exe(self, exe_path):
-        """Estrae l'icona da un file exe usando QFileIconProvider (con trasparenza)"""
+        """Извлекает иконку из exe-файла с помощью QFileIconProvider (с поддержкой прозрачности)"""
         try:
             provider = QFileIconProvider()
             file_info = QFileInfo(exe_path)
@@ -42,12 +42,12 @@ class ProgramScanner(QThread):
                 pixmap = icon.pixmap(32, 32)
                 return pixmap
         except Exception as e:
-            print(f"Error extracting icon from {exe_path}: {e}")
+            print(f"Ошибка извлечения иконки из {exe_path}: {e}")
         
         return None
     
     def _find_best_exe(self, directory, app_name):
-        """Trova l'exe migliore in una directory usando euristiche intelligenti"""
+        """Находит лучший исполняемый файл в директории с помощью интеллектуальных эвристик"""
         if not os.path.isdir(directory):
             return None
         
@@ -95,7 +95,7 @@ class ProgramScanner(QThread):
             return os.path.join(directory, good_exes[0])
             
         except Exception as e:
-            print(f"Error finding best exe in {directory}: {e}")
+            print(f"Ошибка поиска лучшего exe в {directory}: {e}")
             return None
 
     def run(self):
@@ -107,7 +107,7 @@ class ProgramScanner(QThread):
         self.scan_complete.emit()
     
     def _scan_windows(self):
-        """Scansiona programmi Windows dal registro"""
+        """Сканирование программ Windows из системного реестра"""
         seen_names = set()
 
         registry_paths = [
@@ -163,7 +163,7 @@ class ProgramScanner(QThread):
                             if name.lower() not in seen_names:
                                 seen_names.add(name.lower())
                                 
-                                self.progress_update.emit(f"Found: {name}")
+                                self.progress_update.emit(f"Найдено: {name}")
                                 final_icon = icon_path if icon_path and os.path.exists(icon_path) else exe_path
                                 
                                 icon_pixmap = None
@@ -191,7 +191,7 @@ class ProgramScanner(QThread):
             except:
                 continue
 
-        # Start Menu shortcuts
+        # Сканирование ярлыков меню «Пуск»
         start_menu_paths = [
             os.path.join(os.environ.get('PROGRAMDATA', ''), 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
             os.path.join(os.environ.get('APPDATA', ''), 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
@@ -205,7 +205,7 @@ class ProgramScanner(QThread):
                 self.scan_shortcuts(start_path, seen_names)
     
     def _scan_linux(self):
-        """Scansiona programmi Linux dai file .desktop"""
+        """Сканирование программ Linux из .desktop файлов"""
         seen_names = set()
         
         desktop_dirs = [
@@ -232,17 +232,17 @@ class ProgramScanner(QThread):
                         app_data = self._parse_desktop_file(desktop_file)
                         if app_data and app_data['name'].lower() not in seen_names:
                             seen_names.add(app_data['name'].lower())
-                            self.progress_update.emit(f"Found: {app_data['name']}")
+                            self.progress_update.emit(f"Найдено: {app_data['name']}")
                             self.program_found.emit(app_data)
                     except Exception as e:
-                        print(f"Error parsing {desktop_file}: {e}")
+                        print(f"Ошибка разбора {desktop_file}: {e}")
                         continue
             except Exception as e:
-                print(f"Error scanning {desktop_dir}: {e}")
+                print(f"Ошибка сканирования {desktop_dir}: {e}")
                 continue
     
     def _parse_desktop_file(self, filepath):
-        """Parse Linux .desktop file"""
+        """Разбор Linux .desktop файла"""
         name = None
         exec_path = None
         icon = None
@@ -294,11 +294,11 @@ class ProgramScanner(QThread):
             }
         
         except Exception as e:
-            print(f"Error reading {filepath}: {e}")
+            print(f"Ошибка чтения {filepath}: {e}")
             return None
     
     def _find_icon(self, icon_name):
-        """Find Linux icon in standard paths"""
+        """Поиск иконки в стандартных путях Linux"""
         if not icon_name:
             return None
         
@@ -350,7 +350,7 @@ class ProgramScanner(QThread):
         return None
 
     def scan_shortcuts(self, directory, seen_names):
-        """Scan Windows shortcuts"""
+        """Сканирование ярлыков Windows"""
         try:
             import win32com.client
             shell = win32com.client.Dispatch("WScript.Shell")
@@ -366,7 +366,7 @@ class ProgramScanner(QThread):
                                 if name.lower() not in seen_names:
                                     seen_names.add(name.lower())
                                     
-                                    self.progress_update.emit(f"Found: {name}")
+                                    self.progress_update.emit(f"Найдено: {name}")
                                     
                                     icon_pixmap = self._extract_icon_from_exe(target)
                                     
@@ -394,7 +394,7 @@ class ProgramScanDialog(QDialog):
             self.cache_file = Path(cache_file)
         else:
             self.cache_file = Path(f"scanner_cache_{cache_suffix}.json")
-        self.setWindowTitle("Scan Installed Programs")
+        self.setWindowTitle("Сканирование установленных программ")
         self.setModal(True)
         self.setFixedSize(s.scale(700), s.scale(650))
         self.setStyleSheet(f"""
@@ -429,7 +429,7 @@ class ProgramScanDialog(QDialog):
         layout.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30))
 
         header_layout = QHBoxLayout()
-        self.title_label = QLabel("Scanning Installed Programs in Progress...")
+        self.title_label = QLabel("Выполняется сканирование установленных программ...")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         header_layout.addWidget(self.title_label)
         
@@ -450,7 +450,7 @@ class ProgramScanDialog(QDialog):
             """)
         
         self.refresh_btn.setFixedSize(s.scale(40), s.scale(40))
-        self.refresh_btn.setToolTip("Update programs list")
+        self.refresh_btn.setToolTip("Обновить список программ")
         self.refresh_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.refresh_btn.clicked.connect(self.force_rescan)
         self.refresh_btn.setEnabled(False)
@@ -466,7 +466,7 @@ class ProgramScanDialog(QDialog):
         search_box = QHBoxLayout()
         search_box.addWidget(QLabel("🔍"))
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Filter by Name...")
+        self.search_input.setPlaceholderText("Фильтрация по имени...")
         self.search_input.textChanged.connect(self.filter_list)
         search_box.addWidget(self.search_input)
         layout.addLayout(search_box)
@@ -476,16 +476,16 @@ class ProgramScanDialog(QDialog):
         self.list_widget.setIconSize(QSize(s.scale(32), s.scale(32)))
         layout.addWidget(self.list_widget)
 
-        self.info_label = QLabel("Select which programs to add (Ctrl/Shift for multiple)")
+        self.info_label = QLabel("Выберите программы для добавления (Ctrl/Shift для выбора нескольких)")
         self.info_label.setStyleSheet(f"color: #aaa; font-size: {s.scale_font(13)}px;")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.info_label)
 
         btn_layout = QHBoxLayout()
-        self.add_btn = QPushButton("Add selected")
+        self.add_btn = QPushButton("Добавить выбранные")
         self.add_btn.setEnabled(False)
         self.add_btn.clicked.connect(self.accept)
-        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn = QPushButton("Отмена")
         self.cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(self.add_btn)
         btn_layout.addWidget(self.cancel_btn)
@@ -498,14 +498,14 @@ class ProgramScanDialog(QDialog):
         self.scanner = None
         self.cache_loader = None
         if self.load_from_cache_fast():
-            self.title_label.setText(f"Loaded {self.list_widget.count()} programs from cache")
-            self.progress_label.setText("✅ Cache loaded (press ↻ to update)")
+            self.title_label.setText(f"Загружено программ из кэша: {self.list_widget.count()}")
+            self.progress_label.setText("✅ Кэш загружен (нажмите ↻ для обновления)")
             self.refresh_btn.setEnabled(True)
         else:
             self.start_scan()
 
     def load_from_cache_fast(self):
-        """Carica rapidamente dal cache"""
+        """Быстрая загрузка из кэша"""
         if not self.cache_file.exists():
             return False
         
@@ -516,14 +516,14 @@ class ProgramScanDialog(QDialog):
             if not cached_programs:
                 return False
             
-            # Ordina i programmi per nome PRIMA di caricare
+            # Сортируем программы по имени ПЕРЕД загрузкой
             cached_programs.sort(key=lambda x: x['name'].lower())
             
-            # FASE 1: Carica i primi 10 immediatamente (con icone)
+            # ЭТАП 1: Загружаем первые 10 элементов немедленно (с иконками)
             for idx, data in enumerate(cached_programs[:10]):
                 item = QListWidgetItem(f"{data['name']}")
                 
-                # Carica l'icona subito per i primi 10
+                # Загружаем иконку сразу для первых 10
                 if data.get('icon'):
                     provider = QFileIconProvider()
                     file_info = QFileInfo(data['icon'])
@@ -537,49 +537,49 @@ class ProgramScanDialog(QDialog):
                 item.setData(Qt.ItemDataRole.UserRole, data)
                 self.list_widget.addItem(item)
             
-            # Già ordinati, non serve ri-ordinare!
+            # Уже отсортировано, повторная сортировка не требуется!
             
-            # FASE 2: Carica il resto in background se ci sono più di 10
+            # ЭТАП 2: Загружаем остальные в фоновом режиме, если их больше 10
             if len(cached_programs) > 10:
-                self.title_label.setText(f"Loaded 10/{len(cached_programs)} programs")
+                self.title_label.setText(f"Загружено 10/{len(cached_programs)} программ")
                 from PyQt6.QtCore import QTimer
                 QTimer.singleShot(50, lambda: self.load_remaining_icons(cached_programs[10:]))
             else:
-                self.title_label.setText(f"Loaded {len(cached_programs)} programs from cache")
-                self.progress_label.setText("✅ Cache loaded (press ↻ to update)")
+                self.title_label.setText(f"Загружено программ из кэша: {len(cached_programs)}")
+                self.progress_label.setText("✅ Кэш загружен (нажмите ↻ для обновления)")
                 self.refresh_btn.setEnabled(True)
 
             
             return True
             
         except Exception as e:
-            print(f"⚠️ Error loading cache: {e}")
+            print(f"⚠️ Ошибка загрузки кэша: {e}")
             return False
     
     def load_remaining_icons(self, remaining_programs):
-        """Carica i programmi rimanenti progressivamente"""
+        """Прогрессивная загрузка оставшихся программ"""
         from PyQt6.QtCore import QTimer, QCoreApplication
         
         self.remaining_queue = remaining_programs
         self.remaining_index = 0
         self.total_programs = self.list_widget.count() + len(remaining_programs)
         
-        # Timer per caricare a batch
+        # Таймер для пакетной загрузки
         self.remaining_timer = QTimer()
         self.remaining_timer.timeout.connect(self.load_remaining_batch)
-        self.remaining_timer.start(10)  # Ogni 10ms
+        self.remaining_timer.start(10)  # Каждые 10 мс
     
     def load_remaining_batch(self):
-        """Carica un batch di programmi rimanenti"""
-        batch_size = 15  # Carica 15 alla volta
+        """Загрузка пакета оставшихся программ"""
+        batch_size = 15  # Загружаем по 15 штук за раз
         
         for _ in range(batch_size):
             if self.remaining_index >= len(self.remaining_queue):
                 
                 self.remaining_timer.stop()
                 
-                self.title_label.setText(f"Loaded {self.total_programs} programs from cache")
-                self.progress_label.setText("✅ Cache loaded (press ↻ to update)")
+                self.title_label.setText(f"Загружено программ из кэша: {self.total_programs}")
+                self.progress_label.setText("✅ Кэш загружен (нажмите ↻ для обновления)")
                 self.refresh_btn.setEnabled(True)
                 return
             
@@ -587,7 +587,7 @@ class ProgramScanDialog(QDialog):
             
             item = QListWidgetItem(f"{data['name']}")
             
-            # Carica l'icona
+            # Загружаем иконку
             if data.get('icon'):
                 provider = QFileIconProvider()
                 file_info = QFileInfo(data['icon'])
@@ -603,9 +603,9 @@ class ProgramScanDialog(QDialog):
             
             self.remaining_index += 1
         
-        # Aggiorna il conteggio
+        # Обновляем счетчик
         current_count = self.list_widget.count()
-        self.title_label.setText(f"Loading... {current_count}/{self.total_programs}")
+        self.title_label.setText(f"Загрузка... {current_count}/{self.total_programs}")
     
     def save_to_cache(self, programs):
         try:
@@ -617,14 +617,14 @@ class ProgramScanDialog(QDialog):
             
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(programs_to_save, f, indent=2, ensure_ascii=False)
-            print(f"💾 Cache saved with {len(programs_to_save)} programs")
+            print(f"💾 Кэш сохранен, программ: {len(programs_to_save)}")
         except Exception as e:
-            print(f"⚠️ Error saving cache: {e}")
+            print(f"⚠️ Ошибка сохранения кэша: {e}")
     
     def force_rescan(self):
         self.list_widget.clear()
         self.refresh_btn.setEnabled(False)
-        self.title_label.setText("Scanning Installed Programs in Progress...")
+        self.title_label.setText("Выполняется сканирование установленных программ...")
         self.progress_label.setText("")
         self.start_scan()
     
@@ -649,7 +649,7 @@ class ProgramScanDialog(QDialog):
         
         item.setData(Qt.ItemDataRole.UserRole, data)
         self.list_widget.addItem(item)
-        self.title_label.setText(f"Found {self.list_widget.count()} programs")
+        self.title_label.setText(f"Найдено программ: {self.list_widget.count()}")
 
     def scan_done(self):
         programs = []
@@ -660,8 +660,8 @@ class ProgramScanDialog(QDialog):
         self.list_widget.sortItems(Qt.SortOrder.AscendingOrder)
         self.save_to_cache(programs)
         
-        self.title_label.setText(f"Scan completed – Found {self.list_widget.count()} programs")
-        self.progress_label.setText("💾 Cache saved")
+        self.title_label.setText(f"Сканирование завершено – Найдено программ: {self.list_widget.count()}")
+        self.progress_label.setText("💾 Кэш сохранен")
         self.refresh_btn.setEnabled(True)
     
     def update_progress(self, message):
@@ -675,7 +675,8 @@ class ProgramScanDialog(QDialog):
     def update_add_button(self):
         selected = len(self.list_widget.selectedItems())
         self.add_btn.setEnabled(selected > 0)
-        self.info_label.setText(f"{selected} selected" if selected > 0 else "Select the programs to add")
+        self.info_label.setText(f"Выбрано: {selected}" if selected > 0 else "Выберите программы для добавления")
 
     def get_selected(self):
         return [item.data(Qt.ItemDataRole.UserRole) for item in self.list_widget.selectedItems()]
+
