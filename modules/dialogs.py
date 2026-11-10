@@ -1,10 +1,10 @@
 """
-dialogs.py — TV Launcher Dialog Classes
-========================================
-Contiene tutti i dialog estratti da tvlauncher.py:
-  - ApiKeyDialog       : inserimento API key SteamGridDB
-  - SystemMenuDialog   : menu rapido restart/shutdown/close
-  - AddAppDialog       : aggiunta nuova app al launcher
+dialogs.py — Классы диалогов для TV Launcher
+=============================================
+Содержит все диалоги, вынесенные из tvlauncher.py:
+  - ApiKeyDialog       : ввод API-ключа SteamGridDB
+  - SystemMenuDialog   : быстрое меню перезагрузки/выключения/закрытия
+  - AddAppDialog       : добавление нового приложения в лаунчер
 """
 
 from pathlib import Path
@@ -21,7 +21,7 @@ class ApiKeyDialog(QDialog):
     def __init__(self, current_key="", parent=None, scaling=None):
         super().__init__(parent)
         s = scaling
-        self.setWindowTitle("SteamGridDB API Key")
+        self.setWindowTitle("API-ключ SteamGridDB")
         self.setModal(True)
         self.setFixedSize(s.scale(600), s.scale(300))
         self.setStyleSheet(f"""
@@ -50,44 +50,44 @@ class ApiKeyDialog(QDialog):
         layout.setSpacing(s.scale(20))
         layout.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30))
         
-        # Title
-        title = QLabel("🔑 SteamGridDB API Key")
+        # Заголовок
+        title = QLabel("🔑 API-ключ SteamGridDB")
         title.setStyleSheet(f"font-size: {s.scale_font(18)}px; font-weight: bold;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
         
-        # Info text
+        # Информационный текст
         info = QLabel(
-            "To automatically download 16:9 images:\n\n"
-            "1. Go to steamgriddb.com\n"
-            "2. Create a free account\n"
-            "3. Go to Preferences → API\n"
-            "4. Generate an API Key and paste it here"
+            "Для автоматической загрузки изображений 16:9:\n\n"
+            "1. Перейдите на сайт steamgriddb.com\n"
+            "2. Создайте бесплатный аккаунт\n"
+            "3. Перейдите в Preferences (Настройки) → API\n"
+            "4. Сгенерируйте API-ключ и вставьте его сюда"
         )
         info.setStyleSheet(f"color: #aaa; font-size: {s.scale_font(12)}px;")
         info.setWordWrap(True)
         layout.addWidget(info)
         
-        # API Key input
-        key_label = QLabel("API Key:")
+        # Поле ввода API-ключа
+        key_label = QLabel("API-ключ:")
         layout.addWidget(key_label)
         
         self.key_input = QLineEdit()
         self.key_input.setText(current_key)
-        self.key_input.setPlaceholderText("Paste your API here . . .")
+        self.key_input.setPlaceholderText("Вставьте свой API-ключ сюда . . .")
         layout.addWidget(self.key_input)
         
         layout.addStretch()
         
-        # Buttons
+        # Кнопки
         button_layout = QHBoxLayout()
         button_layout.setSpacing(s.scale(15))
         
-        self.save_btn = QPushButton("Save")
+        self.save_btn = QPushButton("Сохранить")
         self.save_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.save_btn.clicked.connect(self.accept)
         
-        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn = QPushButton("Отмена")
         self.cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.cancel_btn.clicked.connect(self.reject)
         
@@ -173,17 +173,17 @@ class SystemMenuDialog(QDialog):
         btn_size = s.scale(60)
         self.restart_btn = QPushButton("↻")
         self.restart_btn.setFixedSize(btn_size, btn_size)
-        self.restart_btn.setToolTip("Restart")
+        self.restart_btn.setToolTip("Перезагрузка")
         self.buttons.append(("restart", self.restart_btn))
         layout.addWidget(self.restart_btn)
         self.shutdown_btn = QPushButton("⏻")
         self.shutdown_btn.setFixedSize(btn_size, btn_size)
-        self.shutdown_btn.setToolTip("Shutdown")
+        self.shutdown_btn.setToolTip("Выключение")
         self.buttons.append(("shutdown", self.shutdown_btn))
         layout.addWidget(self.shutdown_btn)
         self.close_btn = QPushButton("✕")
         self.close_btn.setFixedSize(btn_size, btn_size)
-        self.close_btn.setToolTip("Close")
+        self.close_btn.setToolTip("Закрыть")
         self.buttons.append(("close", self.close_btn))
         layout.addWidget(self.close_btn)
         for action, btn in self.buttons:
@@ -264,7 +264,7 @@ class AddAppDialog(QDialog):
         super().__init__(parent)
         s = scaling
         self._s = s
-        self.setWindowTitle("Add New App")
+        self.setWindowTitle("Добавить новое приложение")
         self.setModal(True)
         self.setFixedSize(s.scale(600), s.scale(520))
         self.setStyleSheet(f"""
@@ -277,37 +277,37 @@ class AddAppDialog(QDialog):
         layout.setSpacing(s.scale(20))
         layout.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30))
         
-        name_label = QLabel("App Name:")
+        name_label = QLabel("Название приложения:")
         name_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(name_label)
         self.name_input = QLineEdit()
         layout.addWidget(self.name_input)
         
-        exe_label = QLabel("Executable Path:")
+        exe_label = QLabel("Путь к исполняемому файлу:")
         exe_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(exe_label)
         exe_container = QHBoxLayout()
         exe_container.setSpacing(s.scale(10))
         self.exe_input = QLineEdit()
         exe_container.addWidget(self.exe_input, 3)
-        self.exe_button = QPushButton("Browse")
+        self.exe_button = QPushButton("Обзор")
         self.exe_button.clicked.connect(self.browse_exe)
         exe_container.addWidget(self.exe_button, 1)
         layout.addLayout(exe_container)
         
-        icon_label = QLabel("Icon Image (16:9 recommended):")
+        icon_label = QLabel("Изображение иконки (рекомендуется 16:9):")
         icon_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(icon_label)
         icon_container = QHBoxLayout()
         icon_container.setSpacing(s.scale(10))
         self.icon_input = QLineEdit()
         icon_container.addWidget(self.icon_input, 3)
-        self.icon_button = QPushButton("Browse")
+        self.icon_button = QPushButton("Обзор")
         self.icon_button.clicked.connect(self.browse_icon)
         icon_container.addWidget(self.icon_button, 1)
         layout.addLayout(icon_container)
         
-        category_label = QLabel("Category:")
+        category_label = QLabel("Категория:")
         category_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(category_label)
         
@@ -315,7 +315,7 @@ class AddAppDialog(QDialog):
         if hasattr(parent, 'category_manager'):
             self.category_combo.addItems(parent.category_manager.get_category_names())
         else:
-            self.category_combo.addItems(['Games', 'Media', 'Programs', 'Other'])
+            self.category_combo.addItems(['Игры', 'Медиа', 'Программы', 'Другое'])
         
         self.category_combo.setStyleSheet(f"""
             QComboBox {{
@@ -335,7 +335,9 @@ class AddAppDialog(QDialog):
             }}
         """)
         
-        index = self.category_combo.findText('Other')
+        index = self.category_combo.findText('Другое')
+        if index < 0:
+            index = self.category_combo.findText('Other')
         if index >= 0:
             self.category_combo.setCurrentIndex(index)
         
@@ -344,10 +346,10 @@ class AddAppDialog(QDialog):
         
         button_layout = QHBoxLayout()
         button_layout.setSpacing(s.scale(15))
-        self.ok_button = QPushButton("Add")
+        self.ok_button = QPushButton("Добавить")
         self.ok_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.ok_button.clicked.connect(self.accept)
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("Отмена")
         self.cancel_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.ok_button)
@@ -395,7 +397,7 @@ class AddAppDialog(QDialog):
    
     def browse_exe(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Executable", "", "Executables (*.exe);;All Files (*.*)"
+            self, "Выберите исполняемый файл", "", "Исполняемые файлы (*.exe);;Все файлы (*.*)"
         )
         if file_path:
             self.exe_input.setText(file_path)
@@ -404,7 +406,7 @@ class AddAppDialog(QDialog):
    
     def browse_icon(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Icon Image", "", "Images (*.png *.jpg *.jpeg *.bmp);;All Files (*.*)"
+            self, "Выберите изображение иконки", "", "Изображения (*.png *.jpg *.jpeg *.bmp);;Все файлы (*.*)"
         )
         if file_path:
             self.icon_input.setText(file_path)
@@ -416,3 +418,4 @@ class AddAppDialog(QDialog):
             'icon': self.icon_input.text(),
             'category': self.category_combo.currentText()
         }
+
