@@ -1,5 +1,5 @@
 """
-Category Editor Dialog - Versione migliorata con Emoji Picker
+Модуль диалога редактора категорий — Улучшенная версия с выборщиком эмодзи
 """
 
 from PyQt6.QtWidgets import (
@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 class AnimatedToggle(QCheckBox):
-    """Checkbox quadrato animato con spunta"""
+    """Анимированный квадратный переключатель (чекбокс) с галочкой"""
     
     def __init__(self, scaling, parent=None):
         super().__init__(parent)
@@ -23,7 +23,7 @@ class AnimatedToggle(QCheckBox):
         self.setFixedSize(self.scaling.scale(32), self.scaling.scale(32))
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         
-        # Animation
+        # Анимация
         self.animation = QPropertyAnimation(self, b"check_progress", self)
         self.animation.setEasingCurve(QEasingCurve.Type.OutCubic)
         self.animation.setDuration(200)
@@ -50,9 +50,9 @@ class AnimatedToggle(QCheckBox):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # Background box
+        # Фоновое поле
         if self.isChecked() or self._check_progress > 0:
-            # Interpolate between gray and green
+            # Интерполяция между серым и зеленым цветом
             gray = QColor("#2a2a2a")
             green = QColor("#4CAF50")
             if self.underMouse():
@@ -67,7 +67,7 @@ class AnimatedToggle(QCheckBox):
             if self.underMouse():
                 bg_color = QColor("#333333")
         
-        # Border
+        # Граница
         border_color = QColor("#444444")
         if self.underMouse():
             border_color = QColor("#666666")
@@ -81,27 +81,27 @@ class AnimatedToggle(QCheckBox):
         painter.drawRoundedRect(2, 2, self.width() - 4, self.height() - 4,
                                self.scaling.scale(6), self.scaling.scale(6))
         
-        # Draw checkmark with animation
+        # Отрисовка галочки с учетом анимации
         if self._check_progress > 0:
             painter.setPen(QPen(QColor("white"), self.scaling.scale(3), 
                               Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, 
                               Qt.PenJoinStyle.RoundJoin))
             
-            # Scale checkmark based on progress
+            # Масштабирование галочки в зависимости от прогресса
             scale = self._check_progress
             
-            # Checkmark coordinates (relative)
+            # Координаты галочки (относительные)
             x_offset = self.width() * 0.25
             y_offset = self.height() * 0.5
             
-            # Short line (bottom-left to middle)
+            # Короткая линия (от нижней левой точки к середине)
             x1 = int(x_offset)
             y1 = int(y_offset)
             x2 = int(x_offset + (self.width() * 0.15 * scale))
             y2 = int(y_offset + (self.height() * 0.15 * scale))
             painter.drawLine(x1, y1, x2, y2)
             
-            # Long line (middle to top-right)
+            # Длинная линия (от середины к верхней правой точке)
             if scale > 0.5:
                 progress = (scale - 0.5) * 2
                 x3 = int(x_offset + (self.width() * 0.45 * progress))
@@ -114,9 +114,9 @@ class AnimatedToggle(QCheckBox):
 
 
 class EmojiPickerDialog(QDialog):
-    """Dialog per selezionare emoji"""
+    """Диалоговое окно для выбора эмодзи"""
     
-    # Emoji comuni per categorie
+    # Распространенные эмодзи для категорий
     CATEGORY_EMOJIS = [
         "🎮", "🎯", "🎨", "🎬", "🎵", "📚", "💼", "🔧",
         "⚙️", "🌐", "📱", "💻", "🖥️", "⌨️", "🖱️", "🎧",
@@ -132,7 +132,7 @@ class EmojiPickerDialog(QDialog):
         self.selected_emoji = current_emoji
         self.scaling = scaling
         
-        self.setWindowTitle("Select Icon")
+        self.setWindowTitle("Выбрать иконку")
         self.setModal(True)
         self.setFixedSize(self.scaling.scale(600), self.scaling.scale(500))
         
@@ -150,8 +150,8 @@ class EmojiPickerDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(15))
         
-        # Titolo
-        title = QLabel("Select an icon for your category")
+        # Заголовок
+        title = QLabel("Выберите иконку для категории")
         title.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -161,7 +161,7 @@ class EmojiPickerDialog(QDialog):
         """)
         layout.addWidget(title)
         
-        # Griglia emoji
+        # Сетка эмодзи
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setStyleSheet(f"""
@@ -192,7 +192,7 @@ class EmojiPickerDialog(QDialog):
             self.scaling.scale(10)
         )
         
-        # Crea bottoni emoji
+        # Создание кнопок с эмодзи
         cols = 8
         for i, emoji in enumerate(self.CATEGORY_EMOJIS):
             btn = QPushButton(emoji)
@@ -215,15 +215,15 @@ class EmojiPickerDialog(QDialog):
         scroll.setWidget(emoji_container)
         layout.addWidget(scroll)
         
-        # Bottoni azione
+        # Кнопки действий
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(self.scaling.scale(10))
         
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton("Отмена")
         cancel_btn.clicked.connect(self.reject)
         cancel_btn.setFixedHeight(self.scaling.scale(40))
         
-        ok_btn = QPushButton("Select")
+        ok_btn = QPushButton("Выбрать")
         ok_btn.clicked.connect(self.accept)
         ok_btn.setFixedHeight(self.scaling.scale(40))
         
@@ -257,7 +257,7 @@ class EmojiPickerDialog(QDialog):
 
 
 class CategoryEditorDialog(QDialog):
-    """Dialog per modificare/aggiungere/rimuovere categorie"""
+    """Диалоговое окно для изменения, добавления и удаления категорий"""
     
     def __init__(self, category_manager, scaling, parent=None):
         super().__init__(parent)
@@ -267,7 +267,7 @@ class CategoryEditorDialog(QDialog):
         self.is_new_category = False
         self.current_emoji = "📦"
         
-        self.setWindowTitle("Category Manager")
+        self.setWindowTitle("Менеджер категорий")
         self.setModal(True)
         self.setFixedSize(self.scaling.scale(900), self.scaling.scale(950))
         
@@ -280,17 +280,17 @@ class CategoryEditorDialog(QDialog):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Header
+        # Верхняя панель (Header)
         header = self._create_header()
         main_layout.addWidget(header)
         
-        # Content
+        # Содержимое
         scroll = self._create_scroll_area()
         content = self._create_content()
         scroll.setWidget(content)
         main_layout.addWidget(scroll)
         
-        # Footer
+        # Нижняя панель (Footer)
         footer = self._create_footer()
         main_layout.addWidget(footer)
         
@@ -298,7 +298,7 @@ class CategoryEditorDialog(QDialog):
         self._refresh_list()
     
     def _create_header(self):
-        """Header con icona"""
+        """Создание шапки с иконкой"""
         header = QWidget()
         header.setFixedHeight(self.scaling.scale(125))
         header.setStyleSheet("""
@@ -315,14 +315,14 @@ class CategoryEditorDialog(QDialog):
             self.scaling.scale(40), self.scaling.scale(25)
         )
         
-        # Titolo container
+        # Контейнер заголовка
         title_container = QWidget()
         title_container.setStyleSheet("background: transparent; border: none;")
         title_layout = QHBoxLayout(title_container)
         title_layout.setSpacing(self.scaling.scale(15))
         title_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Icona
+        # Иконка
         icon_label = QLabel()
         icon_path = Path("assets/icons/folder.png")
         if icon_path.exists():
@@ -345,8 +345,8 @@ class CategoryEditorDialog(QDialog):
             """)
         title_layout.addWidget(icon_label)
         
-        # Titolo
-        title = QLabel("Category Manager")
+        # Заголовок
+        title = QLabel("Менеджер категорий")
         title.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -361,8 +361,8 @@ class CategoryEditorDialog(QDialog):
         
         layout.addWidget(title_container)
         
-        # Sottotitolo
-        subtitle = QLabel("Add, edit, or remove app categories")
+        # Подзаголовок
+        subtitle = QLabel("Добавление, изменение или удаление категорий приложений")
         subtitle.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.5);
@@ -377,7 +377,7 @@ class CategoryEditorDialog(QDialog):
         return header
     
     def _create_scroll_area(self):
-        """Scroll area"""
+        """Создание области прокрутки"""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -406,7 +406,7 @@ class CategoryEditorDialog(QDialog):
         return scroll
     
     def _create_content(self):
-        """Content con sezioni"""
+        """Создание содержимого с секциями"""
         content = QWidget()
         content.setStyleSheet("background: #1a1a1a")
         
@@ -417,14 +417,14 @@ class CategoryEditorDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(25))
         
-        # Sezione: Current Categories
+        # Секция: Текущие категории
         section_header = self._create_section_header(
-            "Current Categories",
-            "Select a category to edit"
+            "Текущие категории",
+            "Выберите категорию для редактирования"
         )
         layout.addWidget(section_header)
         
-        # Lista categorie
+        # Список категорий
         self.category_list = QListWidget()
         self.category_list.setFixedHeight(self.scaling.scale(250))
         self.category_list.setStyleSheet(f"""
@@ -453,14 +453,14 @@ class CategoryEditorDialog(QDialog):
         self.category_list.itemClicked.connect(self._on_category_selected)
         layout.addWidget(self.category_list)
         
-        # Sezione: Edit Category
+        # Секция: Редактирование категории
         section_header2 = self._create_section_header(
-            "Edit Category",
-            "Modify name, icon, and color"
+            "Редактировать категорию",
+            "Изменение названия, иконки и цвета"
         )
         layout.addWidget(section_header2)
         
-        # Editor
+        # Редактор
         editor = self._create_editor()
         layout.addWidget(editor)
         
@@ -469,7 +469,7 @@ class CategoryEditorDialog(QDialog):
         return content
     
     def _create_section_header(self, title, description):
-        """Section header"""
+        """Создание заголовка секции"""
         header = QWidget()
         header.setFixedHeight(self.scaling.scale(60))
         header.setStyleSheet("background: transparent;")
@@ -505,7 +505,7 @@ class CategoryEditorDialog(QDialog):
         return header
     
     def _create_editor(self):
-        """Editor fields"""
+        """Создание полей редактора"""
         editor = QWidget()
         editor.setFixedHeight(self.scaling.scale(260))
         editor.setStyleSheet(f"""
@@ -523,26 +523,26 @@ class CategoryEditorDialog(QDialog):
             self.scaling.scale(25), self.scaling.scale(10)
         )
         
-        # Name row
+        # Строка имени
         name_row = self._create_name_row()
         layout.addWidget(name_row)
         
-        # Icon row (con emoji picker)
+        # Строка иконки (с выборщиком эмодзи)
         icon_row = self._create_icon_row()
         layout.addWidget(icon_row)
         
-        # Color row
+        # Строка цвета
         color_row = self._create_color_row()
         layout.addWidget(color_row)
         
-        # Default category toggle
+        # Переключатель категории по умолчанию
         default_row = self._create_default_row()
         layout.addWidget(default_row)
         
         return editor
     
     def _create_name_row(self):
-        """Campo nome"""
+        """Строка ввода названия"""
         row = QWidget()
         row.setFixedHeight(self.scaling.scale(60))
         row.setStyleSheet("background: transparent; border: none;")
@@ -551,14 +551,14 @@ class CategoryEditorDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(self.scaling.scale(15))
         
-        # Label
+        # Метка
         label_container = QWidget()
         label_container.setStyleSheet("background: transparent; border: none;")
         label_layout = QVBoxLayout(label_container)
         label_layout.setSpacing(self.scaling.scale(3))
         label_layout.setContentsMargins(0, 0, 0, 0)
         
-        label = QLabel("Name")
+        label = QLabel("Название")
         label.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -570,7 +570,7 @@ class CategoryEditorDialog(QDialog):
         """)
         label_layout.addWidget(label)
         
-        hint = QLabel("Category display name")
+        hint = QLabel("Отображаемое имя категории")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.35);
@@ -585,9 +585,9 @@ class CategoryEditorDialog(QDialog):
         
         layout.addWidget(label_container, 1)
         
-        # Input
+        # Поле ввода
         self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("e.g. Games")
+        self.name_input.setPlaceholderText("например, Игры")
         self.name_input.setFixedHeight(self.scaling.scale(45))
         self.name_input.setFixedWidth(self.scaling.scale(300))
         self.name_input.textChanged.connect(self._on_field_changed)
@@ -610,7 +610,7 @@ class CategoryEditorDialog(QDialog):
         return row
     
     def _create_icon_row(self):
-        """Riga icona con emoji picker"""
+        """Строка иконки с выборщиком эмодзи"""
         row = QWidget()
         row.setFixedHeight(self.scaling.scale(75))
         row.setStyleSheet("background: transparent; border: none;")
@@ -619,14 +619,14 @@ class CategoryEditorDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(self.scaling.scale(15))
         
-        # Label
+        # Метка
         label_container = QWidget()
         label_container.setStyleSheet("background: transparent; border: none;")
         label_layout = QVBoxLayout(label_container)
         label_layout.setSpacing(self.scaling.scale(3))
         label_layout.setContentsMargins(0, 0, 0, 0)
         
-        label = QLabel("Icon")
+        label = QLabel("Иконка")
         label.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -638,7 +638,7 @@ class CategoryEditorDialog(QDialog):
         """)
         label_layout.addWidget(label)
         
-        hint = QLabel("Category icon")
+        hint = QLabel("Иконка категории")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.35);
@@ -653,7 +653,7 @@ class CategoryEditorDialog(QDialog):
         
         layout.addWidget(label_container, 1)
         
-        # Preview icona corrente
+        # Предпросмотр текущей иконки
         self.icon_preview = QLabel(self.current_emoji)
         self.icon_preview.setFixedSize(self.scaling.scale(60), self.scaling.scale(45))
         self.icon_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -667,8 +667,8 @@ class CategoryEditorDialog(QDialog):
         """)
         layout.addWidget(self.icon_preview)
         
-        # Bottone per aprire picker
-        self.icon_picker_btn = QPushButton("Choose Icon")
+        # Кнопка открытия выборщика
+        self.icon_picker_btn = QPushButton("Выбрать иконку")
         self.icon_picker_btn.setFixedSize(self.scaling.scale(140), self.scaling.scale(45))
         self.icon_picker_btn.clicked.connect(self._open_emoji_picker)
         self.icon_picker_btn.setStyleSheet(f"""
@@ -689,7 +689,7 @@ class CategoryEditorDialog(QDialog):
         return row
     
     def _create_color_row(self):
-        """Riga colore"""
+        """Строка выбора цвета"""
         row = QWidget()
         row.setFixedHeight(self.scaling.scale(75))
         row.setStyleSheet("background: transparent; border: none;")
@@ -698,14 +698,14 @@ class CategoryEditorDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(self.scaling.scale(15))
         
-        # Label
+        # Метка
         label_container = QWidget()
         label_container.setStyleSheet("background: transparent; border: none;")
         label_layout = QVBoxLayout(label_container)
         label_layout.setSpacing(self.scaling.scale(3))
         label_layout.setContentsMargins(0, 0, 0, 0)
         
-        label = QLabel("Color")
+        label = QLabel("Цвет")
         label.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -717,7 +717,7 @@ class CategoryEditorDialog(QDialog):
         """)
         label_layout.addWidget(label)
         
-        hint = QLabel("Category accent color")
+        hint = QLabel("Акцентный цвет категории")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.35);
@@ -732,7 +732,7 @@ class CategoryEditorDialog(QDialog):
         
         layout.addWidget(label_container, 1)
         
-        # Color input
+        # Поле ввода цвета
         self.color_input = QLineEdit()
         self.color_input.setPlaceholderText("#4CAF50")
         self.color_input.setFixedHeight(self.scaling.scale(45))
@@ -753,9 +753,9 @@ class CategoryEditorDialog(QDialog):
         """)
         layout.addWidget(self.color_input)
         
-        # Pick button
-        self.color_picker_btn = QPushButton("Pick Color")
-        self.color_picker_btn.setFixedSize(self.scaling.scale(100), self.scaling.scale(45))
+        # Кнопка палитры
+        self.color_picker_btn = QPushButton("Выбрать цвет")
+        self.color_picker_btn.setFixedSize(self.scaling.scale(120), self.scaling.scale(45))
         self.color_picker_btn.clicked.connect(self._pick_color)
         self.color_picker_btn.setStyleSheet(f"""
             QPushButton {{
@@ -775,7 +775,7 @@ class CategoryEditorDialog(QDialog):
         return row
     
     def _create_default_row(self):
-        """Riga per mark as default"""
+        """Строка для отметки категории по умолчанию"""
         row = QWidget()
         row.setFixedHeight(self.scaling.scale(60))
         row.setStyleSheet("background: transparent; border: none;")
@@ -784,14 +784,14 @@ class CategoryEditorDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(self.scaling.scale(15))
         
-        # Label
+        # Метка
         label_container = QWidget()
         label_container.setStyleSheet("background: transparent; border: none;")
         label_layout = QVBoxLayout(label_container)
         label_layout.setSpacing(self.scaling.scale(3))
         label_layout.setContentsMargins(0, 0, 0, 0)
         
-        label = QLabel("Default Category")
+        label = QLabel("Категория по умолчанию")
         label.setStyleSheet(f"""
             QLabel {{
                 color: white;
@@ -803,7 +803,7 @@ class CategoryEditorDialog(QDialog):
         """)
         label_layout.addWidget(label)
         
-        hint = QLabel("Show this category at launcher startup")
+        hint = QLabel("Показывать эту категорию при запуске лаунчера")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.35);
@@ -818,7 +818,7 @@ class CategoryEditorDialog(QDialog):
         
         layout.addWidget(label_container, 1)
         
-        # Animated Toggle Switch
+        # Анимированный переключатель
         self.default_checkbox = AnimatedToggle(self.scaling)
         layout.addWidget(self.default_checkbox)
         
@@ -826,7 +826,7 @@ class CategoryEditorDialog(QDialog):
 
     
     def _create_footer(self):
-        """Footer con pulsanti"""
+        """Создание нижней панели с кнопками"""
         footer = QWidget()
         footer.setFixedHeight(self.scaling.scale(90))
         footer.setStyleSheet("""
@@ -843,8 +843,8 @@ class CategoryEditorDialog(QDialog):
         )
         layout.setSpacing(self.scaling.scale(20))
         
-        # Hint
-        hint = QLabel("Navigate: ↑↓  •  Select: Enter  •  Close: Esc")
+        # Подсказка по управлению
+        hint = QLabel("Навигация: ↑↓  •  Выбор: Enter  •  Закрыть: Esc")
         hint.setStyleSheet(f"""
             QLabel {{
                 color: rgba(255, 255, 255, 0.4);
@@ -858,23 +858,23 @@ class CategoryEditorDialog(QDialog):
         
         layout.addStretch()
         
-        # Action buttons
+        # Кнопки действий
         button_layout = QHBoxLayout()
         button_layout.setSpacing(self.scaling.scale(12))
         
-        self.add_btn = QPushButton("+ Add")
+        self.add_btn = QPushButton("+ Добавить")
         self.add_btn.clicked.connect(self._add_category)
-        self.add_btn.setFixedSize(self.scaling.scale(100), self.scaling.scale(50))
+        self.add_btn.setFixedSize(self.scaling.scale(120), self.scaling.scale(50))
         
-        self.save_btn = QPushButton("💾 Save")
+        self.save_btn = QPushButton("💾 Сохранить")
         self.save_btn.clicked.connect(self._save_category)
         self.save_btn.setEnabled(False)
-        self.save_btn.setFixedSize(self.scaling.scale(100), self.scaling.scale(50))
+        self.save_btn.setFixedSize(self.scaling.scale(130), self.scaling.scale(50))
         
-        self.delete_btn = QPushButton("🗑️ Delete")
+        self.delete_btn = QPushButton("🗑️ Удалить")
         self.delete_btn.clicked.connect(self._delete_category)
         self.delete_btn.setEnabled(False)
-        self.delete_btn.setFixedSize(self.scaling.scale(110), self.scaling.scale(50))
+        self.delete_btn.setFixedSize(self.scaling.scale(120), self.scaling.scale(50))
         
         for btn in [self.add_btn, self.save_btn, self.delete_btn]:
             btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -903,8 +903,8 @@ class CategoryEditorDialog(QDialog):
         
         layout.addLayout(button_layout)
         
-        # Close button
-        self.close_btn = QPushButton("Close")
+        # Кнопка закрытия
+        self.close_btn = QPushButton("Закрыть")
         save_icon_path = Path("assets/icons/backup.png")
         if save_icon_path.exists():
             self.close_btn.setIcon(QIcon(str(save_icon_path)))
@@ -930,18 +930,18 @@ class CategoryEditorDialog(QDialog):
         
         return footer
     
-    # ===== METODI FUNZIONALI =====
+    # ===== ФУНКЦИОНАЛЬНЫЕ МЕТОДЫ =====
     
     def _refresh_list(self):
-        """Aggiorna la lista categorie"""
+        """Обновление списка категорий"""
         self.category_list.clear()
         
         for i, category in enumerate(self.category_manager.categories):
-            # Skip "All"
+            # Пропуск категории "All" (Все)
             if category['name'] == 'All':
                 continue
             
-            # Mostra marker se è default
+            # Отображение маркера, если категория по умолчанию
             is_default = category.get('is_default', False)
             display_name = f"{category['icon']} {category['name']}"
             if is_default:
@@ -952,7 +952,7 @@ class CategoryEditorDialog(QDialog):
             self.category_list.addItem(item)
     
     def _on_category_selected(self, item):
-        """Quando selezioni una categoria"""
+        """Срабатывает при выборе категории из списка"""
         index = item.data(Qt.ItemDataRole.UserRole)
         self.selected_index = index
         self.is_new_category = False
@@ -969,12 +969,12 @@ class CategoryEditorDialog(QDialog):
         self.delete_btn.setEnabled(len(self.category_manager.categories) > 2)
     
     def _on_field_changed(self):
-        """Quando modifichi un campo"""
+        """Срабатывает при изменении полей ввода"""
         has_name = bool(self.name_input.text().strip())
         self.save_btn.setEnabled(has_name)
     
     def _open_emoji_picker(self):
-        """Apre emoji picker dialog"""
+        """Открытие диалогового окна выбора эмодзи"""
         picker = EmojiPickerDialog(self.current_emoji, self.scaling, self)
         if picker.exec() == QDialog.DialogCode.Accepted:
             self.current_emoji = picker.selected_emoji
@@ -982,11 +982,11 @@ class CategoryEditorDialog(QDialog):
             self._on_field_changed()
     
     def _pick_color(self):
-        """Apre color picker"""
+        """Открытие палитры выбора цвета"""
         current_color = QColor(self.color_input.text() if self.color_input.text() else "#4CAF50")
         
         color_dialog = QColorDialog(current_color, self)
-        color_dialog.setWindowTitle("Pick a Color")
+        color_dialog.setWindowTitle("Выбрать цвет")
         color_dialog.setStyleSheet("""
             QColorDialog {
                 background-color: #1a1a1a;
@@ -1013,7 +1013,7 @@ class CategoryEditorDialog(QDialog):
                 self.color_input.setText(color.name())
     
     def _add_category(self):
-        """Aggiungi nuova categoria"""
+        """Добавление новой категории"""
         self.category_list.clearSelection()
         
         self.name_input.clear()
@@ -1031,26 +1031,25 @@ class CategoryEditorDialog(QDialog):
         self.name_input.setFocus()
     
     def _save_category(self):
-        """Salva categoria"""
+        """Сохранение категории"""
         name = self.name_input.text().strip()
         icon = self.current_emoji
         color = self.color_input.text().strip()
         is_default = self.default_checkbox.isChecked()
         
-        # Validazione
+        # Проверка корректности ввода
         if not name:
-            QMessageBox.warning(self, "Invalid Input", "Category name cannot be empty!")
+            QMessageBox.warning(self, "Неверный ввод", "Название категории не может быть пустым!")
             return
         
         if not color or not color.startswith('#'):
             color = "#4CAF50"
         
-        # Controlla duplicati
+        # Проверка на дубликаты
         for i, cat in enumerate(self.category_manager.categories):
             if cat['name'].lower() == name.lower() and i != self.selected_index:
-                QMessageBox.warning(self, "Duplicate", f"Category '{name}' already exists!")
+                QMessageBox.warning(self, "Дубликат", f"Категория '{name}' уже существует!")
                 return
-        
         
         if is_default:
             for cat in self.category_manager.categories:
@@ -1064,19 +1063,19 @@ class CategoryEditorDialog(QDialog):
         }
         
         if self.selected_index >= 0 and not self.is_new_category:
-            # Modifica esistente
+            # Редактирование существующей категории
             old_name = self.category_manager.categories[self.selected_index]['name']
             self.category_manager.categories[self.selected_index] = new_category
-            print(f"Category updated: {old_name} → {name}")
+            print(f"Категория обновлена: {old_name} → {name}")
 
-            # Propaga il rename a tutte le app che usavano il vecchio nome,
-            # altrimenti restano assegnate a una categoria che non esiste più.
+            # Перенос переименования на все приложения, которые использовали старое имя,
+            # иначе они останутся привязаны к несуществующей категории.
             if old_name != name:
                 self._reassign_apps_category(old_name, name)
         else:
-            # Nuova categoria
+            # Новая категория
             self.category_manager.categories.append(new_category)
-            print(f"Category added: {name}")
+            print(f"Категория добавлена: {name}")
         
         self.is_new_category = False
         self.selected_index = -1
@@ -1091,27 +1090,22 @@ class CategoryEditorDialog(QDialog):
         self.save_btn.setEnabled(False)
         self.delete_btn.setEnabled(False)
 
-        # Salva subito su disco: senza questa chiamata la modifica resta
-        # solo in memoria finche' non si chiude il dialog col pulsante
-        # "Close" (che e' l'unico altro punto che chiama save_config()).
-        # Se nel frattempo il launcher viene chiuso in un altro modo
-        # (X della finestra, Alt+F4, spegnimento), closeEvent() non salva
-        # nulla e la rinomina va persa: al riavvio si torna allo stato
-        # precedente pur avendo premuto "Save".
+        # Сохранение на диск сразу: без этого изменения остаются
+        # только в памяти до закрытия диалога кнопкой "Закрыть".
+        # Если закрыть окно иным способом (крестик, Alt+F4, выключение),
+        # метод closeEvent() ничего не сохранит, и изменения пропадут.
         launcher = self.parent()
         if hasattr(launcher, 'save_config'):
             try:
                 launcher.save_config()
             except Exception as e:
-                print(f"⚠️ Could not persist category save: {e}")
+                print(f"⚠️ Не удалось сохранить изменения категории: {e}")
     
     def _reassign_apps_category(self, old_name, new_name):
-        """Aggiorna app['category'] per ogni app che puntava a old_name.
+        """Обновление поля app['category'] для каждого приложения со старым именем.
 
-        Senza questo passaggio, rinominare o eliminare una categoria lascia
-        le app assegnate a un nome di categoria che non esiste più nella
-        lista categorie, quindi spariscono dai filtri finché non vengono
-        ri-assegnate manualmente.
+        Без этого переименование или удаление категории оставляет приложения
+        привязанными к имени, которого больше нет, из-за чего они исчезают из фильтров.
         """
         launcher = self.parent()
         apps = getattr(launcher, 'apps', None)
@@ -1125,40 +1119,38 @@ class CategoryEditorDialog(QDialog):
                 changed = True
 
         if changed:
-            print(f"Reassigned apps: '{old_name}' → '{new_name}'")
-            # Salva subito, così i dati restano coerenti anche se l'utente
-            # chiude il dialog senza passare da "Close" (es. Esc/Alt+F4).
+            print(f"Переназначены приложения: '{old_name}' → '{new_name}'")
+            # Сохраняем сразу, чтобы данные не расходились при закрытии через Esc/Alt+F4.
             if hasattr(launcher, 'save_config'):
                 try:
                     launcher.save_config()
                 except Exception as e:
-                    print(f"⚠️ Could not persist app category reassignment: {e}")
+                    print(f"⚠️ Не удалось сохранить переназначение категории приложения: {e}")
 
     def _delete_category(self):
-        """Elimina categoria"""
+        """Удаление категории"""
         if self.selected_index < 0:
             return
         
         category = self.category_manager.categories[self.selected_index]
         
         if category['name'] == 'All':
-            QMessageBox.warning(self, "Cannot Delete", "Cannot delete 'All' category!")
+            QMessageBox.warning(self, "Удаление невозможно", "Нельзя удалить категорию 'All' (Все)!")
             return
         
         reply = QMessageBox.question(
             self,
-            "Confirm Delete",
-            f"Delete category '{category['name']}'?\n\nApps in this category will be moved to 'Other'.",
+            "Подтверждение удаления",
+            f"Удалить категорию '{category['name']}'?\n\nПриложения из этой категории будут перемещены в 'Other' (Другое).",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
         if reply == QMessageBox.StandardButton.Yes:
             deleted_name = category['name']
             self.category_manager.categories.pop(self.selected_index)
-            print(f"Category deleted: {deleted_name}")
+            print(f"Категория удалена: {deleted_name}")
 
-            # Sposta le app che usavano questa categoria su 'Other',
-            # come promesso nel dialog di conferma sopra.
+            # Перенос приложений из удаленной категории в 'Other'
             self._reassign_apps_category(deleted_name, 'Other')
 
             self._refresh_list()
@@ -1171,6 +1163,4 @@ class CategoryEditorDialog(QDialog):
             self.default_checkbox.setChecked(False)
             self.save_btn.setEnabled(False)
             self.delete_btn.setEnabled(False)
-
-
 
