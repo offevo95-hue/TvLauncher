@@ -1,13 +1,13 @@
-
+Import os
+import json
+from pathlib import Path
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt6.QtGui import QFont
-from pathlib import Path
-import json
 
 
 class CategoryManager:
-    """Gestisce le categorie e il filtro delle app"""
+    """Управление категориями и фильтрацией приложений"""
     
     DEFAULT_CATEGORIES = [
         {"name": "All", "icon": "🎮", "color": "#ffffff"},
@@ -32,18 +32,18 @@ class CategoryManager:
                     if 'categories' in data:
                         self.categories = data['categories']
         except Exception as e:
-            print(f"⚠️ Error loading categories: {e}")
+            print(f"⚠️ Ошибка загрузки категорий: {e}")
     
     def save_categories(self, config_data):
         config_data['categories'] = self.categories
         return config_data
     
     def _clamp_current_category(self):
-        """Riporta current_category dentro i limiti validi.
+        """Возвращает current_category в допустимые пределы.
 
-        Puo' finire fuori range se le categorie cambiano numero (es. una
-        categoria viene eliminata) mentre current_category punta ancora a
-        una posizione che non esiste piu'.
+        Может выйти за границы, если количество категорий изменилось (например,
+        категория была удалена), а current_category все еще указывает
+        на несуществующую позицию.
         """
         if not self.categories:
             self.current_category = 0
@@ -86,18 +86,18 @@ class CategoryManager:
         return 'Other'
 
     def _set_initial_category(self):
-        """Imposta la categoria iniziale all'avvio basandosi sul flag is_default"""
+        """Устанавливает начальную категорию при запуске на основе флага is_default"""
         for i, category in enumerate(self.categories):
             if category.get('is_default', False):
                 self.current_category = i
-                print(f"Default category set to: {category['name']} (index {i})")
+                print(f"Категория по умолчанию установлена: {category['name']} (индекс {i})")
                 return
         
         
 
 
 class CategorySelector(QWidget):
-    """Widget UI per la selezione visuale delle categorie"""
+    """Виджет пользовательского интерфейса для визуального выбора категорий"""
     
     category_changed = pyqtSignal(int)
     
@@ -144,12 +144,11 @@ class CategorySelector(QWidget):
         self._build_labels()
 
     def _build_labels(self):
-        """Crea i QLabel per le categorie correnti.
+        """Создает элементы QLabel для текущих категорий.
 
-        Estratto da setup_ui() cosi' puo' essere richiamato da rebuild()
-        ogni volta che le categorie cambiano (add/rename/delete), invece
-        di lasciare la barra selettore con label create una sola volta
-        all'avvio e mai piu' aggiornate.
+        Вынесено из setup_ui(), чтобы можно было вызывать из rebuild()
+        при изменении категорий (добавление/переименование/удаление),
+        а не оставлять панель с метками, созданными один раз при запуске.
         """
         for label in self.category_labels:
             self._layout.removeWidget(label)
@@ -165,11 +164,11 @@ class CategorySelector(QWidget):
             self.category_labels.append(label)
 
     def rebuild(self):
-        """Ricostruisce la barra dopo che le categorie sono cambiate
-        (add/rename/delete dal Category Manager), cosi' i cambiamenti sono
-        visibili subito senza dover riavviare il launcher, ed evita
-        l'IndexError in update_display() quando il numero di categorie
-        cambia rispetto a quello con cui la barra era stata creata.
+        """Перестраивает панель после изменения категорий
+        (добавление/переименование/удаление из Менеджера категорий),
+        чтобы изменения были видны сразу без перезапуска лаунчера,
+        и предотвращает IndexError в update_display(), если количество
+        категорий изменилось.
         """
         num_categories = len(self.category_manager.categories)
         if num_categories == 0:
@@ -215,9 +214,8 @@ class CategorySelector(QWidget):
         num_categories = len(self.category_manager.categories)
         for i, label in enumerate(self.category_labels):
             if i >= num_categories:
-                # Le categorie sono cambiate (es. delete) ma rebuild() non
-                # e' ancora stato chiamato: non tentare di leggere un indice
-                # che non esiste piu'.
+                # Категории изменились (например, удаление), но rebuild()
+                # еще не вызван: не пытаемся читать несуществующий индекс.
                 break
             category = self.category_manager.categories[i]
             is_active = (i == current)
@@ -272,11 +270,10 @@ class CategorySelector(QWidget):
 
 
 def _position_category_selector(launcher):
-    """Riallinea il widget delle categorie alla posizione verticale attuale
-    del carosello (che può essere spostato su/giù dallo slider nelle
-    impostazioni), invece di restare fisso su una y calcolata una sola
-    volta all'avvio. Il selettore viene agganciato appena sopra il
-    carosello, seguendolo quando questo si sposta.
+    """Выравнивает виджет категорий по текущей вертикальной позиции
+    карусели (которая может смещаться вверх/вниз ползунком в настройках),
+    а не фиксирует ее на значении y, вычисленном при запуске. Селектор
+    прикрепляется прямо над каруселью, следуя за ее перемещением.
     """
     if not hasattr(launcher, 'category_selector') or not hasattr(launcher, 'carousel_container'):
         return
@@ -294,7 +291,7 @@ def _position_category_selector(launcher):
 
 
 def integrate_categories(launcher):
-    """Integra il sistema categorie nel launcher"""
+    """Интеграция системы категорий в лаунчер"""
     launcher.category_manager = CategoryManager(launcher.config_file)
     launcher.category_selector = CategorySelector(
         launcher.category_manager, 
@@ -302,14 +299,13 @@ def integrate_categories(launcher):
         launcher 
     )
     
-    # IMPOSTA DIMENSIONI FISSE
+    # УСТАНОВКА ФИКСИРОВАННЫХ РАЗМЕРОВ
     num_categories = len(launcher.category_manager.categories)
     selector_width = (num_categories * launcher.scaling.scale(155)) + launcher.scaling.scale(40)
     launcher.category_selector.setFixedWidth(selector_width)
     
-    # Posizione iniziale: agganciata sopra il carosello, non più una y fissa.
+    # Начальная позиция: закреплена над каруселью (без фиксированного y)
     _position_category_selector(launcher)
-    
     
     launcher.category_selector.setWindowFlags(Qt.WindowType.Widget | Qt.WindowType.FramelessWindowHint)
     launcher.category_selector.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
@@ -340,17 +336,16 @@ def integrate_categories(launcher):
                 changed = True
         if changed:
             launcher.save_config()
-            print(f"Applied default category '{default_cat}' to uncategorized apps")
+            print(f"Применена категория по умолчанию '{default_cat}' к приложениям без категории")
     
     apply_default_categories()
     launcher.apply_default_categories = apply_default_categories
     
-   
     launcher.build_infinite_carousel()
 
 
 def add_category_navigation_to_keypressevent(launcher, event):
-    """Aggiunge navigazione categorie via tastiera"""
+    """Добавление навигации по категориям с клавиатуры"""
     if not hasattr(launcher, 'category_selector'):
         return False
     
@@ -368,14 +363,12 @@ def add_category_navigation_to_keypressevent(launcher, event):
             event.accept()
             return True
         elif key == Qt.Key.Key_Down:
-            
             launcher.sound_manager.navigate()
             launcher.is_in_category_selector = False
             launcher.category_selector.hide_animated()
             event.accept()
             return True
         elif key == Qt.Key.Key_Escape:
-            
             launcher.sound_manager.back()
             launcher.is_in_category_selector = False
             launcher.category_selector.hide_animated()
@@ -386,7 +379,6 @@ def add_category_navigation_to_keypressevent(launcher, event):
     
     if key == Qt.Key.Key_Up:
         if not launcher.is_in_menu and not getattr(launcher, 'reorder_active', False):
-            
             launcher.sound_manager.navigate()
             launcher.is_in_category_selector = True
             _position_category_selector(launcher)
@@ -400,16 +392,13 @@ def add_category_navigation_to_keypressevent(launcher, event):
 
 
 def add_quick_category_shortcut(launcher):
-    """Aggiunge scorciatoia C per quick category dialog"""
+    """Добавление горячей клавиши C для быстрого диалога категорий"""
     original_key_press = launcher.keyPressEvent
     
     def enhanced_key_press(event):
         key = event.key()
         
-       
-        
         if key == Qt.Key.Key_C and not launcher.is_in_menu and launcher.apps and not launcher.is_in_category_selector:
-            
             app_data = launcher.apps[launcher.current_index]
             launcher._category_dialog_open = True
             new_category = QuickCategoryDialog.show(launcher, app_data)
@@ -438,7 +427,7 @@ def add_quick_category_shortcut(launcher):
 
 
 class QuickCategoryDialog:
-    """Dialog rapido per cambiare categoria"""
+    """Быстрый диалог для изменения категории"""
     
     @staticmethod
     def show(launcher, app_data):
@@ -447,7 +436,7 @@ class QuickCategoryDialog:
         import pygame
         
         dialog = QDialog(launcher)
-        dialog.setWindowTitle(f"Category: {app_data['name']}")
+        dialog.setWindowTitle(f"Категория: {app_data['name']}")
         dialog.setModal(True)
         dialog.setFixedSize(launcher.scaling.scale(450), launcher.scaling.scale(450))
         dialog.setStyleSheet("QDialog { background-color: #1a1a1a; }")
@@ -476,7 +465,7 @@ class QuickCategoryDialog:
         )
         header_layout.setSpacing(launcher.scaling.scale(2))
         
-        title = QLabel("📂 Category")
+        title = QLabel("📂 Категория")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet(f"""
             QLabel {{
@@ -562,7 +551,7 @@ class QuickCategoryDialog:
         
         layout.addStretch()
         
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton("Отмена")
         cancel_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #2a2a2a;
@@ -624,7 +613,7 @@ class QuickCategoryDialog:
                                 color: white;
                                 border: 2px solid #444;
                                 padding: {launcher.scaling.scale(12)}px {launcher.scaling.scale(15)}px;
-                                border-radius: {launcher.scaling.scale(8)}px;
+                                border-radius: {launcher.scaling.scale_font(8)}px;
                                 font-size: {launcher.scaling.scale_font(14)}px;
                                 font-weight: bold;
                                 text-align: left;
@@ -661,9 +650,7 @@ class QuickCategoryDialog:
         
         dialog.keyPressEvent = key_handler
         
-        
         update_focus()
-        
         
         dialog.show()
         dialog.raise_()
@@ -678,24 +665,20 @@ class QuickCategoryDialog:
                 return selected_category
         
         return None
-        
-        
 
 
 def add_category_joystick_support(launcher):
-    """SIMPLIFIED: Registra il category selector nel JoystickManager"""
+    """УПРОЩЕНО: Регистрация селектора категорий в JoystickManager"""
     
     if not hasattr(launcher, 'joystick_manager') or not launcher.joystick_manager:
-        print("⚠️ JoystickManager not found, skipping category joystick integration")
+        print("⚠️ JoystickManager не найден, интеграция джойстика для категорий пропущена")
         return
     
-    # Registra semplicemente il launcher - il JoystickManager gestirà tutto
     launcher.joystick_manager.register_category_support(launcher)
-    
 
 
 def _handle_bottom_menu_joystick(launcher):
-    """Gestisce input joystick nel menu basso"""
+    """Обработка ввода с джойстика в нижнем меню"""
     import pygame
     
     y_axis = launcher.joystick.get_axis(1)
@@ -715,7 +698,7 @@ def _handle_bottom_menu_joystick(launcher):
 
 
 def _handle_category_selector_joystick_blocking(launcher):
-    """FIX: Gestione category selector - LEFT/RIGHT naviga, DOWN chiude + D-PAD SUPPORT"""
+    """ИСПРАВЛЕНИЕ: Управление селектором категорий — LEFT/RIGHT навигация, DOWN закрытие + ПОДДЕРЖКА D-PAD"""
     import pygame
     from PyQt6.QtCore import QTimer
     
@@ -726,29 +709,29 @@ def _handle_category_selector_joystick_blocking(launcher):
     if launcher.joystick.get_numhats() > 0:
         hat = launcher.joystick.get_hat(0)
     
-    # Lettura D-Pad PS4 completa
+    # Полное чтение D-Pad PS4
     dpad_left = launcher.joystick.get_button(13) if launcher.joystick.get_numbuttons() > 13 else False
     dpad_right = launcher.joystick.get_button(14) if launcher.joystick.get_numbuttons() > 14 else False
     dpad_down = launcher.joystick.get_button(12) if launcher.joystick.get_numbuttons() > 12 else False
     
-    # NAVIGAZIONE ORIZZONTALE (cambio categoria LEFT/RIGHT)
+    # ГОРИЗОНТАЛЬНАЯ НАВИГАЦИЯ (смена категории LEFT/RIGHT)
     current_state_x = (x_axis > launcher.axis_deadzone, x_axis < -launcher.axis_deadzone, hat[0], dpad_right, dpad_left)
     last_state_x = getattr(launcher, '_category_selector_last_x', (False, False, 0, False, False))
     
     moved_right = False
     moved_left = False
     
-    # Analogico
+    # Аналоговый стик
     if x_axis > launcher.axis_deadzone and not last_state_x[0]:
         moved_right = True
     elif x_axis < -launcher.axis_deadzone and not last_state_x[1]:
         moved_left = True
-    # Hat
+    # Hat (крестовина)
     elif hat[0] == 1 and last_state_x[2] != 1:
         moved_right = True
     elif hat[0] == -1 and last_state_x[2] != -1:
         moved_left = True
-    #  D-Pad PS4
+    # D-Pad PS4
     elif dpad_right and not last_state_x[3]:
         moved_right = True
     elif dpad_left and not last_state_x[4]:
@@ -763,19 +746,18 @@ def _handle_category_selector_joystick_blocking(launcher):
     
     launcher._category_selector_last_x = current_state_x
     
-    
     current_state_y = (y_axis < -launcher.axis_deadzone, y_axis > launcher.axis_deadzone, hat[1], dpad_down)
     last_state_y = getattr(launcher, '_category_selector_last_y', (False, False, 0, False))
     
-    # Rileva SOLO pressione DOWN (non UP)
+    # Обнаружение ТОЛЬКО нажатия DOWN (не UP)
     moved_down = False
-    # Analogico
+    # Аналоговый стик
     if y_axis > launcher.axis_deadzone and not last_state_y[1]:
         moved_down = True
     # Hat
     elif hat[1] == -1 and last_state_y[2] != -1:
         moved_down = True
-    #  D-Pad PS4
+    # D-Pad PS4
     elif dpad_down and not last_state_y[3]:
         moved_down = True
     
@@ -786,52 +768,48 @@ def _handle_category_selector_joystick_blocking(launcher):
     
     launcher._category_selector_last_y = current_state_y
     
-   
     current_b_state = launcher.joystick.get_button(1)
     last_b_state = getattr(launcher, '_category_selector_last_b', False)
     
-    # Rileva PRESSIONE (non mantenimento)
+    # Обнаружение нажатия (а не удержания)
     if current_b_state and not last_b_state:
         launcher.sound_manager.back()
         _close_category_selector_with_block(launcher)
-        #
         current_time = pygame.time.get_ticks()
-        launcher.button_cooldown[1] = current_time + 500  # Blocca B per 500ms extra
-        launcher._category_selector_last_b = True  # Mantieni True per evitare retriggering
+        launcher.button_cooldown[1] = current_time + 500  # Дополнительная блокировка B на 500мс
+        launcher._category_selector_last_b = True  # Оставляем True во избежание повторного срабатывания
         return
     
     launcher._category_selector_last_b = current_b_state
     
-    
     for i in range(launcher.joystick.get_numbuttons()):
         if launcher.joystick.get_button(i):
             current_time = pygame.time.get_ticks()
-            # Aggiorna cooldown per TUTTI i pulsanti
+            # Обновление cooldown для ВСЕХ кнопок
             launcher.button_cooldown[i] = current_time + 400
 
 
 def _close_category_selector_with_block(launcher):
-    """Chiude il category selector e blocca TUTTI gli input per 500ms"""
+    """Закрывает селектор категорий и блокирует ВСЕ входы на 500мс"""
     from PyQt6.QtCore import QTimer
     import pygame
     
     launcher.is_in_category_selector = False
     launcher.category_selector.hide_animated()
     
-    
     launcher._category_selector_blocking_input = True
     
-    # Reset stati con 5 elementi per X e 4 per Y
+    # Сброс состояний (5 элементов для X и 4 для Y)
     launcher._category_selector_last_x = (False, False, 0, False, False)
     launcher._category_selector_last_y = (False, False, 0, False)
     launcher._category_selector_last_b = False
     
-    # Blocca anche TUTTI i pulsanti per 500ms
+    # Блокировка ВСЕХ кнопок на 500мс
     current_time = pygame.time.get_ticks()
     for i in range(launcher.joystick.get_numbuttons()):
         launcher.button_cooldown[i] = current_time + 500
     
-    # Forza lo stato D-Pad a TRUE per evitare il retriggering
+    # Принудительная установка состояния D-Pad в TRUE во избежание повторного срабатывания
     y_axis = launcher.joystick.get_axis(1)
     hat = (0, 0)
     if launcher.joystick.get_numhats() > 0:
@@ -839,20 +817,19 @@ def _close_category_selector_with_block(launcher):
     dpad_down = launcher.joystick.get_button(12) if launcher.joystick.get_numbuttons() > 12 else False
     dpad_up = launcher.joystick.get_button(11) if launcher.joystick.get_numbuttons() > 11 else False
     
-    
     launcher._carousel_last_y = (
-        y_axis > launcher.axis_deadzone or dpad_down,  # Se D-Pad DOWN premuto, forza TRUE
-        y_axis < -launcher.axis_deadzone or dpad_up,   # Se D-Pad UP premuto, forza TRUE
+        y_axis > launcher.axis_deadzone or dpad_down,  # Если зажат D-Pad DOWN, принудительно TRUE
+        y_axis < -launcher.axis_deadzone or dpad_up,   # Если зажат D-Pad UP, принудительно TRUE
         hat[1] if hat[1] != 0 else launcher._carousel_last_y[2] if hasattr(launcher, '_carousel_last_y') else 0,
-        True if dpad_down else False,  # Forza D-Pad DOWN come TRUE
-        True if dpad_up else False     # Forza D-Pad UP come TRUE
+        True if dpad_down else False,  # Принудительно D-Pad DOWN как TRUE
+        True if dpad_up else False     # Принудительно D-Pad UP как TRUE
     )
     
-    #  Blocca anche i button cooldown specifici per D-Pad
+    # Блокировка специфичных cooldown для D-Pad
     if dpad_down:
-        launcher.button_cooldown[12] = current_time + 600  # Extra 100ms per D-Pad DOWN
+        launcher.button_cooldown[12] = current_time + 600  # Дополнительно 100мс для D-Pad DOWN
     if dpad_up:
-        launcher.button_cooldown[11] = current_time + 600  # Extra 100ms per D-Pad UP
+        launcher.button_cooldown[11] = current_time + 600  # Дополнительно 100мс для D-Pad UP
     
     def unblock():
         launcher._category_selector_blocking_input = False
@@ -860,17 +837,16 @@ def _close_category_selector_with_block(launcher):
     QTimer.singleShot(500, unblock)
 
 
-
 def add_category_to_edit_dialog(dialog, launcher):
-    """Aggiunge selector categoria all'EditAppDialog"""
+    """Добавление выбора категории в EditAppDialog"""
     from PyQt6.QtWidgets import QComboBox, QLabel
     
     layout = dialog.layout()
     if layout is None:
-        print("⚠️ add_category_to_edit_dialog chiamato prima di setLayout()")
+        print("⚠️ add_category_to_edit_dialog вызван до setLayout()")
         return
     
-    category_label = QLabel("Category:")
+    category_label = QLabel("Категория:")
     category_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
     
     category_combo = QComboBox()
@@ -921,3 +897,4 @@ def add_category_to_edit_dialog(dialog, launcher):
         return data
     
     dialog.get_app_data = get_app_data_with_category
+
