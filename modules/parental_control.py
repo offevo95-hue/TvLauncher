@@ -17,19 +17,19 @@ from PyQt6.QtGui import QFont, QColor, QKeyEvent, QPainter, QBrush
 PIN_LENGTH = 4
 
 SECURITY_QUESTIONS = [
-    "What was the name of your first pet?",
-    "What city were you born in?",
-    "What is your mother's maiden name?",
-    "What was the name of your primary school?",
-    "What was your childhood best friend's name?",
-    "What is your favourite childhood movie?",
+    "Как звали вашего первого домашнего питомца?",
+    "В каком городе вы родились?",
+    "Какова девичья фамилия вашей матери?",
+    "Как называлась ваша начальная школа?",
+    "Как звали вашего лучшего друга детства?",
+    "Какой ваш любимый фильм из детства?",
 ]
 
 MAX_ATTEMPTS = 5
 LOCKOUT_SECONDS = 30
 
 
-# Security 
+# Безопасность 
 
 
 def _hash_value(value: str, salt: str) -> str:
@@ -40,7 +40,7 @@ def _generate_salt() -> str:
     return secrets.token_hex(16)
 
 
-# Styles
+# Стили
 
 
 def _base_style(scale_fn) -> str:
@@ -93,7 +93,7 @@ def _numpad_btn_style(size: int, font_size: int, mode="normal") -> str:
     return f"QPushButton {{ background-color: #2a2a2a; color: white; border: 2px solid #444; border-radius: {radius}px; font-size: {font_size}px; font-weight: 600; }}"
 
 
-# UI 
+# Интерфейс 
 
 
 class NumPadWidget(QWidget):
@@ -178,7 +178,7 @@ class PinDotsWidget(QWidget):
             painter.drawEllipse(x - dot_r, y - dot_r, dot_r * 2, dot_r * 2)
 
 
-# Dialogs
+# Диалоги
 
 
 class PinEntryDialog(QDialog):
@@ -207,10 +207,10 @@ class PinEntryDialog(QDialog):
         icon = QLabel("🔒"); icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         icon.setStyleSheet(f"font-size: {s.scale(36)}px;"); cl.addWidget(icon)
 
-        title = QLabel("Parental Control"); title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title = QLabel("Родительский контроль"); title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet(f"font-size: {s.scale(20)}px; font-weight: 700; color: white;"); cl.addWidget(title)
 
-        self.subtitle = QLabel("Enter your PIN to continue"); self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.subtitle = QLabel("Введите PIN-код для продолжения"); self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.subtitle.setStyleSheet(f"color: rgba(255,255,255,0.5); font-size: {s.scale(13)}px;"); cl.addWidget(self.subtitle)
 
         self.dots = PinDotsWidget(s); cl.addWidget(self.dots)
@@ -224,14 +224,14 @@ class PinEntryDialog(QDialog):
 
         cl.addSpacing(s.scale(10)) 
 
-        self.recovery_btn = QPushButton("Forgot your PIN?")
+        self.recovery_btn = QPushButton("Забыли PIN-код?")
         self.recovery_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus) 
         self.recovery_btn.setStyleSheet(f"QPushButton {{ color: #4a9eff; background: transparent; border: none; font-size: {s.scale(13)}px; text-decoration: underline; }}")
         self.recovery_btn.clicked.connect(self._open_recovery); cl.addWidget(self.recovery_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         if self.mode == "verify":
             cl.addSpacing(s.scale(5))
-            cancel = QPushButton("Cancel"); cancel.setFixedHeight(s.scale(44))
+            cancel = QPushButton("Отмена"); cancel.setFixedHeight(s.scale(44))
             cancel.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             cancel.clicked.connect(self.reject); cl.addWidget(cancel)
 
@@ -249,7 +249,7 @@ class PinEntryDialog(QDialog):
         else:
             self._attempts += 1; self._pin = ""; self.dots.set_count(0)
             if self._attempts >= MAX_ATTEMPTS: self._start_lockout()
-            else: self.error_label.setText(f"Wrong PIN. {MAX_ATTEMPTS - self._attempts} left.")
+            else: self.error_label.setText(f"Неверный PIN. Осталось попыток: {MAX_ATTEMPTS - self._attempts}.")
 
     def _start_lockout(self):
         self._locked_until = time.time() + LOCKOUT_SECONDS; self._update_lockout()
@@ -257,11 +257,11 @@ class PinEntryDialog(QDialog):
 
     def _update_lockout(self):
         rem = int(self._locked_until - time.time())
-        if rem > 0: self.error_label.setText(f"Wait {rem}s.")
+        if rem > 0: self.error_label.setText(f"Подождите {rem}с.")
         else: self.t.stop(); self.error_label.setText("")
 
     def _open_recovery(self):
-        """Nasconde il keypad e apre la procedura di recupero"""
+        """Скрывает цифровую клавиатуру и открывает процедуру восстановления"""
         self.hide()
         recovery = PinRecoveryDialog(self.manager, self, scaling=self.scaling, boot_mode=(self.mode == "boot"))
         if recovery.exec() == QDialog.DialogCode.Accepted:
@@ -269,11 +269,11 @@ class PinEntryDialog(QDialog):
             if setup.exec() == QDialog.DialogCode.Accepted:
                 self.accept()
                 return
-        # In boot: se l'utente non completa il recovery → chiude il launcher
+        # При запуске (boot): если пользователь не завершил восстановление → закрываем лаунчер
         if self.mode == "boot":
             self.reject()
         else:
-            # In verify: chiude il PIN dialog e restituisce il focus al launcher
+            # При проверке (verify): закрываем диалог PIN и возвращаем фокус на лаунчер
             self.reject()
             if self.parent():
                 self.parent().raise_()
@@ -310,36 +310,36 @@ class PinRecoveryDialog(QDialog):
         outer = QVBoxLayout(self); outer.setContentsMargins(0, 0, 0, 0)
         card = QWidget(); card.setObjectName("card")
         layout = QVBoxLayout(card); layout.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30)); layout.setSpacing(s.scale(16))
-        title = QLabel("🔑 Recovery"); title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title = QLabel("🔑 Восстановление"); title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet(f"font-size: {s.scale(20)}px; font-weight: 700; color: white;"); layout.addWidget(title)
         q_lbl = QLabel(self.manager.security_question); q_lbl.setWordWrap(True); q_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         q_lbl.setStyleSheet(f"color: rgba(255,255,255,0.6); font-size: {s.scale(14)}px;"); layout.addWidget(q_lbl)
-        self.answer_input = QLineEdit(); self.answer_input.setPlaceholderText("Your answer…")
+        self.answer_input = QLineEdit(); self.answer_input.setPlaceholderText("Ваш ответ…")
         self.answer_input.setFixedHeight(s.scale(48)); layout.addWidget(self.answer_input)
         self.error_lbl = QLabel(""); self.error_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); self.error_lbl.setStyleSheet("color: #ff6060;")
         layout.addWidget(self.error_lbl)
         btns = QHBoxLayout(); btns.setSpacing(s.scale(10))
         
-        cancel_label = "Exit" if self.boot_mode else "Cancel"
+        cancel_label = "Выход" if self.boot_mode else "Отмена"
         self.c_btn = QPushButton(cancel_label); self.c_btn.setFixedHeight(s.scale(48))
         self.c_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.c_btn.clicked.connect(self.reject)
-        self.ok_btn = QPushButton("Confirm"); self.ok_btn.setFixedHeight(s.scale(48))
+        self.ok_btn = QPushButton("Подтвердить"); self.ok_btn.setFixedHeight(s.scale(48))
         self.ok_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.ok_btn.setStyleSheet("QPushButton { background-color: #3a3a3a; border: 2px solid white; }")
         self.ok_btn.clicked.connect(self._verify)
         btns.addWidget(self.c_btn); btns.addWidget(self.ok_btn); layout.addLayout(btns)
         outer.addWidget(card); self.answer_input.setFocus()
         self.answer_input.installEventFilter(self)
-        # Tieni traccia dei widget navigabili con frecce 
+        # Отслеживание виджетов, доступных для навигации с помощью стрелок 
         self._focus_widgets = [self.answer_input, self.ok_btn, self.c_btn]
         self._focus_idx = 0
 
     def _verify(self):
         if self.manager.verify_security_answer(self.answer_input.text()): self.accept()
-        else: self.error_lbl.setText("Incorrect answer.")
+        else: self.error_lbl.setText("Неверный ответ.")
 
     def eventFilter(self, obj, e):
-        """Intercetta Left/Right sul QLineEdit per navigare tra i bottoni."""
+        """Перехватывает нажатия Left/Right на QLineEdit для навигации между кнопками."""
         if obj is self.answer_input and e.type() == e.Type.KeyPress:
             k = e.key()
             if k == Qt.Key.Key_Right:
@@ -403,9 +403,9 @@ class PinSetupDialog(QDialog):
         card = QWidget(); card.setObjectName("card")
         cl = QVBoxLayout(card); cl.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30)); cl.setSpacing(s.scale(10))
         icon = QLabel("🛡️"); icon.setAlignment(Qt.AlignmentFlag.AlignCenter); icon.setStyleSheet(f"font-size: {s.scale(32)}px;"); cl.addWidget(icon)
-        self.title_lbl = QLabel("New PIN"); self.title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_lbl = QLabel("Новый PIN-код"); self.title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_lbl.setStyleSheet(f"font-size: {s.scale(20)}px; font-weight: 700; color: white;"); cl.addWidget(self.title_lbl)
-        self.sub_lbl = QLabel("Enter a 4-digit PIN"); self.sub_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); self.sub_lbl.setStyleSheet(f"color: rgba(255,255,255,0.5);"); cl.addWidget(self.sub_lbl)
+        self.sub_lbl = QLabel("Введите 4-значный PIN-код"); self.sub_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); self.sub_lbl.setStyleSheet(f"color: rgba(255,255,255,0.5);"); cl.addWidget(self.sub_lbl)
         self.dots = PinDotsWidget(s); cl.addWidget(self.dots)
         self.error_lbl = QLabel(""); self.error_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); self.error_lbl.setStyleSheet("color: #ff6060;"); cl.addWidget(self.error_lbl)
         self.numpad = NumPadWidget(s)
@@ -413,11 +413,11 @@ class PinSetupDialog(QDialog):
         cl.addWidget(self.numpad, alignment=Qt.AlignmentFlag.AlignCenter)
         self.question_widget = QWidget(); ql = QVBoxLayout(self.question_widget); ql.setSpacing(s.scale(8))
         self.question_combo = QComboBox(); [self.question_combo.addItem(q) for q in SECURITY_QUESTIONS]
-        self.answer_input = QLineEdit(); self.answer_input.setPlaceholderText("Secret answer…")
-        self.save_btn = QPushButton("Save PIN"); self.save_btn.setFixedHeight(s.scale(48)); self.save_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.save_btn.clicked.connect(self._save_pin)
-        ql.addWidget(QLabel("Security Question")); ql.addWidget(self.question_combo); ql.addWidget(QLabel("Your Answer")); ql.addWidget(self.answer_input); ql.addWidget(self.save_btn)
+        self.answer_input = QLineEdit(); self.answer_input.setPlaceholderText("Секретный ответ…")
+        self.save_btn = QPushButton("Сохранить PIN"); self.save_btn.setFixedHeight(s.scale(48)); self.save_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.save_btn.clicked.connect(self._save_pin)
+        ql.addWidget(QLabel("Контрольный вопрос")); ql.addWidget(self.question_combo); ql.addWidget(QLabel("Ваш ответ")); ql.addWidget(self.answer_input); ql.addWidget(self.save_btn)
         self.question_widget.setVisible(False); cl.addWidget(self.question_widget)
-        self.cancel_btn = QPushButton("Cancel"); self.cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.cancel_btn.setStyleSheet("background: transparent; color: gray; border: none; font-size: 13px;"); self.cancel_btn.clicked.connect(self.reject); cl.addWidget(self.cancel_btn)
+        self.cancel_btn = QPushButton("Отмена"); self.cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus); self.cancel_btn.setStyleSheet("background: transparent; color: gray; border: none; font-size: 13px;"); self.cancel_btn.clicked.connect(self.reject); cl.addWidget(self.cancel_btn)
         outer.addWidget(card)
 
     def _on_digit(self, digit):
@@ -428,19 +428,19 @@ class PinSetupDialog(QDialog):
     def _on_confirm(self):
         if self._step == 1:
             self._first_pin, self._new_pin, self._step = self._new_pin, "", 2
-            self.title_lbl.setText("Confirm PIN"); self.dots.set_count(0)
+            self.title_lbl.setText("Подтвердите PIN"); self.dots.set_count(0)
         elif self._step == 2:
             if self._new_pin == self._first_pin:
                 self._step = 3; self.numpad.hide(); self.dots.hide(); self.sub_lbl.hide()
-                self.title_lbl.setText("Security Question"); self.question_widget.show(); self.answer_input.setFocus()
+                self.title_lbl.setText("Контрольный вопрос"); self.question_widget.show(); self.answer_input.setFocus()
             else:
-                self._new_pin, self._step = "", 1; self.title_lbl.setText("New PIN"); self.dots.set_count(0); self.error_lbl.setText("PINs mismatch.")
+                self._new_pin, self._step = "", 1; self.title_lbl.setText("Новый PIN-код"); self.dots.set_count(0); self.error_lbl.setText("PIN-коды не совпадают.")
     def _save_pin(self):
         if self.answer_input.text().strip():
             self.manager.set_pin(self._first_pin, self.question_combo.currentIndex(), self.answer_input.text().strip())
             self.accept()
         else:
-            self.error_lbl.setText("Answer cannot be empty.")
+            self.error_lbl.setText("Ответ не может быть пустым.")
 
     def keyPressEvent(self, e):
         if e.isAutoRepeat(): return
@@ -457,7 +457,7 @@ class PinSetupDialog(QDialog):
             else: super().keyPressEvent(e)
 
 
-# Manager & integrazione
+# Менеджер и интеграция
 
 
 class ParentalControlManager:
@@ -468,7 +468,7 @@ class ParentalControlManager:
             try:
                 with open(self.config_path, "r") as f: return json.load(f)
             except Exception as e:
-                print(f"[ParentalControl] Warning: could not read config ({e}), using defaults.")
+                print(f"[ParentalControl] Предупреждение: не удалось прочитать конфигурацию ({e}), используются значения по умолчанию.")
         return {"enabled": False, "pin_hash": "", "pin_salt": "", "security_question_index": 0, "security_answer_hash": "", "security_answer_salt": ""}
     def _save(self):
         with open(self.config_path, "w") as f: json.dump(self._data, f, indent=2)
@@ -502,7 +502,7 @@ class _FallbackScaling:
 
 def integrate_parental_control(launcher, user_data_dir: Path = None):
     if user_data_dir is None:
-        # Windows: APPDATA, Linux/Mac: XDG_CONFIG_HOME o ~/.config
+        # Windows: APPDATA, Linux/Mac: XDG_CONFIG_HOME или ~/.config
         if os.name == 'nt':
             user_data_dir = Path(os.environ.get("APPDATA", Path.home())) / "TVLauncher"
         else:
@@ -516,7 +516,7 @@ def integrate_parental_control(launcher, user_data_dir: Path = None):
         launcher.parental_control_dialog_active = val
 
     def _exec_pc(dialog):
-        """Esegue un dialog PC settando e resettando il flag sul launcher."""
+        """Выполняет диалог родительского контроля, устанавливая и сбрасывая флаг в лаунчере."""
         _set_pc_active(True)
         result = dialog.exec()
         _set_pc_active(False)
@@ -533,12 +533,12 @@ def integrate_parental_control(launcher, user_data_dir: Path = None):
             outer = QVBoxLayout(menu); outer.setContentsMargins(0, 0, 0, 0)
             card = QWidget(); card.setObjectName("card"); outer.addWidget(card)
             layout = QVBoxLayout(card); layout.setContentsMargins(s.scale(24), s.scale(24), s.scale(24), s.scale(24)); layout.setSpacing(s.scale(12))
-            lbl = QLabel("🛡️ Parental Control active"); lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); lbl.setStyleSheet(f"font-size: {s.scale(18)}px; font-weight: 700;"); layout.addWidget(lbl)
+            lbl = QLabel("🛡️ Родительский контроль активен"); lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); lbl.setStyleSheet(f"font-size: {s.scale(18)}px; font-weight: 700;"); layout.addWidget(lbl)
             def _btn(text, color="#2a2a2a", t_color="white"):
                 b = QPushButton(text); b.setFixedHeight(s.scale(50)); b.setStyleSheet(f"QPushButton {{ background-color: {color}; color: {t_color}; border: 1px solid #444; }}"); layout.addWidget(b); return b
-            _btn("Change PIN").clicked.connect(lambda: (menu.done(1)))
-            _btn("Disable Parental Control", "#2a1a1a", "#ff8080").clicked.connect(lambda: (menu.done(2)))
-            _btn("Cancel").clicked.connect(menu.reject)
+            _btn("Изменить PIN-код").clicked.connect(lambda: (menu.done(1)))
+            _btn("Отключить родительский контроль", "#2a1a1a", "#ff8080").clicked.connect(lambda: (menu.done(2)))
+            _btn("Отмена").clicked.connect(menu.reject)
             res = _exec_pc(menu)
             if res == 1: _exec_pc(PinSetupDialog(mgr, launcher, scaling=s, is_change=True))
             elif res == 2: mgr.disable()
