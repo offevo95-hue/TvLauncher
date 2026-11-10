@@ -40,14 +40,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade buildozer cython
 
-    - name: Build with Buildozer
+    - name: Build with Buildozer (Verbose)
       run: |
-        buildozer -v android debug || (cat .buildozer/android/platform/build-arm64-v8a_armeabi-v7a/build/dists/tvlauncher/build.log || echo "Log not found")
-        exit 1
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: TvLauncher-APK
-        path: bin/*.apk
+        # Запускаем в режиме максимальной детализации (дублируем в консоль всё подряд)
+        buildozer -v android debug
 
