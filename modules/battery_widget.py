@@ -3,24 +3,24 @@ from pathlib import Path
 
 
 _DEBUG_BATTERY = False
-_DEBUG_PERCENT  = 80      # percentuale da simulare
-_DEBUG_CHARGING = False   # True = simula carica in corso
+_DEBUG_PERCENT  = 80      # процент для симуляции
+_DEBUG_CHARGING = False   # True = симуляция зарядки
 
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PyQt6.QtCore import Qt, QTimer
 
 
-# Soglie percentuale
+# Пороговые значения процентов
 THRESHOLD_LOW  = 30
 THRESHOLD_FULL = 50
 
-# Nomi file icone (in assets/icons/)
+# Имена файлов иконок (в assets/icons/)
 ICON_CHARGING = "battery_charging.png"
 ICON_FULL     = "battery_full.png"
 ICON_MID      = "battery_mid.png"
 ICON_LOW      = "battery_low.png"
 
-# Emoji fallback se l'icona non esiste
+# Запасные эмодзи (fallback), если иконка не существует
 EMOJI_CHARGING = "🔌"
 EMOJI_FULL     = "🔋"
 EMOJI_MID      = "🔋"
@@ -49,12 +49,12 @@ def _pick_emoji(percent: int, charging: bool) -> str:
 
 def _pick_color(percent: int, charging: bool) -> str:
     if charging:
-        return "#4CAF50"   # verde
+        return "#4CAF50"   # зеленый
     if percent < THRESHOLD_LOW:
-        return "#ff4a4a"   # rosso
+        return "#ff4a4a"   # красный
     if percent < THRESHOLD_FULL:
-        return "#FFA500"   # arancione
-    return "#aaaaaa"       # grigio neutro
+        return "#FFA500"   # оранжевый
+    return "#aaaaaa"       # нейтральный серый
 
 
 class BatteryWidget(QWidget):
@@ -68,14 +68,14 @@ class BatteryWidget(QWidget):
 
         self._build_ui()
         self._refresh()
-        self._last_charging = None  # Stato carica precedente
+        self._last_charging = None  # Предыдущее состояние зарядки
 
-        # Timer principale: aggiorna tutto ogni refresh_ms
+        # Основной таймер: обновление всего каждые refresh_ms
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._refresh)
         self._timer.start(self.refresh_ms)
 
-        # Timer veloce: controlla solo plug/unplug ogni 2 secondi
+        # Быстрый таймер: проверка подключения/отключения кабеля каждую секунду
         self._plug_timer = QTimer(self)
         self._plug_timer.timeout.connect(self._check_plug_change)
         self._plug_timer.start(1_000)
@@ -106,11 +106,11 @@ class BatteryWidget(QWidget):
 
     @staticmethod
     def battery_available() -> bool:
-        """Ritorna True se c'è una batteria (reale o in modalità debug)."""
+        """Возвращает True, если присутствует батарея (реальная или в режиме отладки)."""
         return _DEBUG_BATTERY or psutil.sensors_battery() is not None
 
     def _check_plug_change(self):
-        """Controlla se lo stato del caricatore è cambiato e aggiorna subito."""
+        """Проверяет, изменилось ли состояние зарядного устройства, и сразу обновляет данные."""
         if _DEBUG_BATTERY:
             return
         battery = psutil.sensors_battery()
@@ -118,7 +118,7 @@ class BatteryWidget(QWidget):
             return
         current_charging = battery.power_plugged
         if self._last_charging is not None and current_charging != self._last_charging:
-            self._refresh()  # Aggiornamento immediato
+            self._refresh()  # Немедленное обновление
         self._last_charging = current_charging
 
     def _refresh(self):
@@ -158,7 +158,7 @@ class BatteryWidget(QWidget):
                 self._icon_label.setFixedSize(size, size)
                 return
 
-        # Fallback: emoji
+        # Резервный вариант (Fallback): эмодзи
         self._icon_label.setText(_pick_emoji(percent, charging))
         self._icon_label.setStyleSheet(
             f"background: transparent; border: none; "
@@ -177,8 +177,9 @@ class BatteryWidget(QWidget):
    
 
     def cleanup(self):
-        """Ferma il timer. Chiamare prima della chiusura."""
+        """Останавливает таймеры. Вызывать перед закрытием."""
         if self._timer.isActive():
             self._timer.stop()
         if self._plug_timer.isActive():
             self._plug_timer.stop()
+
