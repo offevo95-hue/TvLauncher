@@ -1,16 +1,16 @@
 """
-Responsive Scaling Module
-Gestisce il ridimensionamento responsive basato sulla risoluzione dello schermo
+Модуль адаптивного масштабирования (Responsive Scaling Module)
+Управление адаптивным изменением размеров на основе разрешения экрана
 """
 import platform
 from PyQt6.QtWidgets import QApplication
 
 
 class ResponsiveScaling:
-    """Resolution based responsive scaling"""
+    """Адаптивное масштабирование на основе разрешения экрана"""
    
     def __init__(self):
-        # Risoluzione di riferimento 
+        # Базовое разрешение 
         self.BASE_WIDTH = 1920
         self.BASE_HEIGHT = 1080
        
@@ -34,14 +34,15 @@ class ResponsiveScaling:
         
         self.scale_factor = min(width_scale, height_scale)
        
-        print(f"📐 Screen: {self.screen_width}x{self.screen_height} (logical)")
-        print(f"📐 Physical: {int(physical_width)}x{int(physical_height)} (DPR: {dpr})")
-        print(f"📐 Scale factor: {self.scale_factor:.2f}")
+        print(f"📐 Экран: {self.screen_width}x{self.screen_height} (логические)")
+        print(f"📐 Физические размеры: {int(physical_width)}x{int(physical_height)} (DPR: {dpr})")
+        print(f"📐 Коэффициент масштабирования: {self.scale_factor:.2f}")
    
     def scale(self, value):
-        """Scala un valore in base alla risoluzione"""
+        """Масштабирование значения в зависимости от разрешения"""
         return int(value * self.scale_factor)
    
     def scale_font(self, base_size):
-        """Scala la dimensione del font"""
+        """Масштабирование размера шрифта"""
         return int(base_size * self.scale_factor)
+
