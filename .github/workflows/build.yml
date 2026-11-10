@@ -25,8 +25,7 @@ jobs:
 
     - name: Build EXE with PyInstaller
       run: |
-        # ВНИМАНИЕ: Если ваш главный файл называется не main.py, 
-        # замените "main.py" в конце строчки на точное имя вашего файла (например, app.py)
+        # Если ваш главный файл называется не main.py, измените его здесь:
         pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" main.py
 
     - name: Upload Build Artifact
