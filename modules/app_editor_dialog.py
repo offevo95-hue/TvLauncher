@@ -16,7 +16,7 @@ class EditAppDialog(QDialog):
         super().__init__(parent)
         s = scaling
         self._s = s
-        self.setWindowTitle("Edit App")
+        self.setWindowTitle("Редактировать приложение")
         self.setModal(True)
         self.setFixedSize(s.scale(600), s.scale(520))
         self.setStyleSheet(f"""
@@ -46,7 +46,7 @@ class EditAppDialog(QDialog):
         layout.setContentsMargins(s.scale(30), s.scale(30), s.scale(30), s.scale(30))
         
         # App Name
-        name_label = QLabel("App Name:")
+        name_label = QLabel("Название приложения:")
         name_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(name_label)
         self.name_input = QLineEdit()
@@ -54,7 +54,7 @@ class EditAppDialog(QDialog):
         layout.addWidget(self.name_input)
         
         # Executable Path
-        exe_label = QLabel("Executable Path:")
+        exe_label = QLabel("Путь к исполняемому файлу:")
         exe_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(exe_label)
         exe_container = QHBoxLayout()
@@ -62,13 +62,13 @@ class EditAppDialog(QDialog):
         self.exe_input = QLineEdit()
         self.exe_input.setText(app_data.get('path', ''))
         exe_container.addWidget(self.exe_input, 3)
-        self.exe_button = QPushButton("Browse")
+        self.exe_button = QPushButton("Обзор")
         self.exe_button.clicked.connect(self.browse_exe)
         exe_container.addWidget(self.exe_button, 1)
         layout.addLayout(exe_container)
         
         # Icon Image
-        icon_label = QLabel("Icon Image (16:9 recommended):")
+        icon_label = QLabel("Изображение иконки (рекомендуется 16:9):")
         icon_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(icon_label)
         icon_container = QHBoxLayout()
@@ -76,13 +76,13 @@ class EditAppDialog(QDialog):
         self.icon_input = QLineEdit()
         self.icon_input.setText(app_data.get('icon', ''))
         icon_container.addWidget(self.icon_input, 3)
-        self.icon_button = QPushButton("Browse")
+        self.icon_button = QPushButton("Обзор")
         self.icon_button.clicked.connect(self.browse_icon)
         icon_container.addWidget(self.icon_button, 1)
         layout.addLayout(icon_container)
         
         # Category
-        category_label = QLabel("Category:")
+        category_label = QLabel("Категория:")
         category_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(category_label)
         
@@ -90,7 +90,7 @@ class EditAppDialog(QDialog):
         if hasattr(parent, 'category_manager'):
             self.category_combo.addItems(parent.category_manager.get_category_names())
         else:
-            self.category_combo.addItems(['Games', 'Media', 'Work', 'Other'])
+            self.category_combo.addItems(['Игры', 'Медиа', 'Работа', 'Другое'])
         
         self.category_combo.setStyleSheet(f"""
             QComboBox {{
@@ -128,10 +128,10 @@ class EditAppDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(s.scale(15))
-        self.save_button = QPushButton("Save")
+        self.save_button = QPushButton("Сохранить")
         self.save_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.save_button.clicked.connect(self.accept)
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("Отмена")
         self.cancel_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.save_button)
@@ -182,7 +182,7 @@ class EditAppDialog(QDialog):
     def browse_exe(self):
         """Apre dialog per selezionare l'eseguibile"""
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Executable", "", "Executables (*.exe);;All Files (*.*)"
+            self, "Выберите исполняемый файл", "", "Исполняемые файлы (*.exe);;Все файлы (*.*)"
         )
         if file_path:
             self.exe_input.setText(file_path)
@@ -190,7 +190,7 @@ class EditAppDialog(QDialog):
     def browse_icon(self):
         """Apre dialog per selezionare l'icona"""
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Icon Image", "", "Images (*.png *.jpg *.jpeg *.bmp);;All Files (*.*)"
+            self, "Выберите изображение иконки", "", "Изображения (*.png *.jpg *.jpeg *.bmp);;Все файлы (*.*)"
         )
         if file_path:
             self.icon_input.setText(file_path)
@@ -203,3 +203,4 @@ class EditAppDialog(QDialog):
             'icon': self.icon_input.text(),
             'category': self.category_combo.currentText()
         }
+
