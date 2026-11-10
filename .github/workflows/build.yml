@@ -21,15 +21,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade pyinstaller PyQt6 pygame python-mpv requests
+        pip install --upgrade pyinstaller PyQt6 pygame requests
 
     - name: Build EXE with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" tvlauncher.py
+        # ВНИМАНИЕ: Если ваш главный файл называется не main.py, 
+        # замените "main.py" в конце строчки на точное имя вашего файла (например, app.py)
+        pyinstaller --noconfirm --onedir --windowed --add-data "assets;assets" main.py
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: TvLauncher-Windows-EXE
-        path: dist/tvlauncher/
+        path: dist/
 
