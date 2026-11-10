@@ -10,7 +10,7 @@ except ImportError:
 
 
 class ReorderMode:
-    """Manages the reordering state and UI feedback"""
+    """Управляет состоянием изменения порядка и обратной связью пользовательского интерфейса"""
     
     def __init__(self, launcher):
         self.launcher = launcher
@@ -18,44 +18,44 @@ class ReorderMode:
         self.selected_index = None
         self.target_index = None
         
-        # Timer for long press detection (keyboard only)
+        # Таймер для определения длинного нажатия (только для клавиатуры)
         self.long_press_timer = QTimer()
         self.long_press_timer.timeout.connect(self._activate_reorder)
-        self.long_press_duration = 800  # ms to hold before activating
+        self.long_press_duration = 800  # мс удерживания перед активацией
         
-        # UI overlay
+        # Оверлей пользовательского интерфейса
         self.overlay = None
         self.instruction_label = None
 
-        # Debounce for buttons
+        # Защита от частых нажатий (дебаунс) для кнопок
         self.last_button_times = {}
         
-        # Flag to prevent reactivation after exiting
+        # Флаг предотвращения повторной активации после выхода
         self.recently_exited = False
         self.exit_cooldown_timer = QTimer()
         self.exit_cooldown_timer.timeout.connect(self._clear_exit_cooldown)
         self.exit_cooldown_timer.setSingleShot(True)
         
     def _clear_exit_cooldown(self):
-        """Clears the exit cooldown flag"""
+        """Очищает флаг задержки выхода"""
         self.recently_exited = False
     
     def _is_dialog_active(self):
-        """Check if any dialog or menu is currently active"""
+        """Проверяет, активен ли какой-либо диалог или меню"""
         from PyQt6.QtWidgets import QApplication
-        # Check if any modal dialog is open
+        # Проверка, открыт ли модальный диалог
         active_modal = QApplication.activeModalWidget()
         if active_modal:
             return True
-        # Check if any popup is open
+        # Проверка, открыт ли какой-либо всплывающий элемент
         active_popup = QApplication.activePopupWidget()
         if active_popup:
             return True
         return False
         
     def start_long_press(self):
-        """Called when launch button is pressed"""
-        # Don't activate if in menu, dialog active, or recently exited
+        """Вызывается при нажатии кнопки запуска"""
+        # Не активировать, если открыто меню, диалог или недавно выполнен выход
         if (not self.is_active and 
             self.launcher.apps and 
             not self.recently_exited and
@@ -64,22 +64,22 @@ class ReorderMode:
             self.long_press_timer.start(self.long_press_duration)
     
     def cancel_long_press(self):
-        """Called when launch button is released"""
+        """Вызывается при отпускании кнопки запуска"""
         if self.long_press_timer.isActive():
             self.long_press_timer.stop()
     
     def force_cancel_all_timers(self):
-        """Force cancel all timers - called when launching app"""
+        """Принудительно отменяет все таймеры — вызывается при запуске приложения"""
         if self.long_press_timer.isActive():
             self.long_press_timer.stop()
         if self.exit_cooldown_timer.isActive():
             self.exit_cooldown_timer.stop()
     
     def _activate_reorder(self):
-        """Activates reorder mode after long press"""
+        """Активирует режим сортировки после длинного нажатия"""
         self.long_press_timer.stop()
         
-        # Don't activate if dialog is open or in menu
+        # Не активировать, если открыт диалог или меню
         if (self.launcher.apps and 
             not self.is_active and 
             not self.launcher.is_in_menu and
@@ -89,24 +89,24 @@ class ReorderMode:
             self.target_index = self.launcher.current_index
             self._show_reorder_ui()
             self._update_tile_highlights()
-            print(f"🔄 Reorder mode activated - Selected: {self.launcher.apps[self.selected_index]['name']}")
+            print(f"🔄 Режим сортировки активирован — Выбрано: {self.launcher.apps[self.selected_index]['name']}")
     
     def _show_reorder_ui(self):
-        """Shows visual feedback for reorder mode"""
+        """Показывает визуальную обратную связь для режима сортировки"""
         if self.overlay is None:
-            # Create semi-transparent overlay
+            # Создание полупрозрачного оверлея
             self.overlay = QWidget(self.launcher)
             self.overlay.setGeometry(0, 0, self.launcher.width(), self.launcher.height())
             self.overlay.setStyleSheet("background-color: rgba(0, 0, 0, 0.5);")
             self.overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
             
-            # Create instruction label
+            # Создание метки с инструкциями
             self.instruction_label = QLabel(self.overlay)
             self.instruction_label.setText(
-                "🔄 REORDER MODE\n\n"
-                "← → to move position\n"
-                "Enter/A to confirm | Esc/B to cancel\n"
-                "R or RB to toggle mode"
+                "🔄 РЕЖИМ СОРТИРОВКИ\n\n"
+                "← → для перемещения\n"
+                "Enter/A для подтверждения | Esc/B для отмены\n"
+                "R или RB для переключения режима"
             )
             self.instruction_label.setStyleSheet(f"""
                 QLabel {{
@@ -121,7 +121,7 @@ class ReorderMode:
             """)
             self.instruction_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             
-            # Position at top center
+            # Позиционирование по центру вверху
             self.instruction_label.adjustSize()
             x = (self.launcher.width() - self.instruction_label.width()) // 2
             y = self.launcher.scaling.scale(100)
@@ -131,27 +131,27 @@ class ReorderMode:
         self.overlay.show()
         self.instruction_label.show()
         
-        # Add position numbers to tiles
+        # Добавление номеров позиций на плитки
         self._add_position_numbers()
     
     def _hide_reorder_ui(self):
-        """Hides reorder mode UI"""
+        """Скрывает интерфейс режима сортировки"""
         if self.overlay:
             self.overlay.hide()
         if self.instruction_label:
             self.instruction_label.hide()
         
-        # Remove position numbers
+        # Удаление номеров позиций
         self._remove_position_numbers()
     
     def _add_position_numbers(self):
-        """Adds position number labels to each tile"""
+        """Добавляет метки номеров позиций к каждой плитке"""
         if not self.launcher.tiles:
             return
         
         for tile in self.launcher.tiles:
             if not hasattr(tile, 'position_label'):
-                # Create position label
+                # Создание метки позиции
                 tile.position_label = QLabel(tile)
                 tile.position_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 tile.position_label.setStyleSheet(f"""
@@ -165,7 +165,7 @@ class ReorderMode:
                     }}
                 """)
                 
-                # Position in top-left corner of tile
+                # Позиционирование в верхнем левом углу плитки
                 size = self.launcher.scaling.scale(50)
                 tile.position_label.setFixedSize(size, size)
                 tile.position_label.move(
@@ -173,13 +173,13 @@ class ReorderMode:
                     self.launcher.scaling.scale(10)
                 )
             
-            # Update the number (1-based indexing for user)
+            # Обновление номера (индексация с 1 для пользователя)
             tile.position_label.setText(str(tile.app_index + 1))
             tile.position_label.show()
             tile.position_label.raise_()
     
     def _remove_position_numbers(self):
-        """Removes position number labels from tiles"""
+        """Удаляет метки номеров позиций с плиток"""
         if not self.launcher.tiles:
             return
         
@@ -188,7 +188,7 @@ class ReorderMode:
                 tile.position_label.hide()
     
     def _update_tile_highlights(self):
-        """Updates visual highlights on tiles during reorder"""
+        """Обновляет визуальную подсветку плиток во время сортировки"""
         if not self.is_active or not self.launcher.tiles:
             return
         
@@ -197,7 +197,7 @@ class ReorderMode:
         for i, tile in enumerate(self.launcher.tiles):
             app_idx = tile.app_index
             
-            # Selected tile - bright gold border
+            # Выбранная плитка — яркая золотая рамка
             if app_idx == self.selected_index:
                 tile.image_label.setStyleSheet(f"""
                     QLabel {{
@@ -209,7 +209,7 @@ class ReorderMode:
                         font-weight: 600;
                     }}
                 """)
-            # Target position - blue border
+            # Целевая позиция — синяя рамка
             elif app_idx == self.target_index:
                 tile.image_label.setStyleSheet(f"""
                     QLabel {{
@@ -221,7 +221,7 @@ class ReorderMode:
                         font-weight: 600;
                     }}
                 """)
-            # Normal tiles
+            # Обычные плитки
             else:
                 tile.image_label.setStyleSheet(f"""
                     QLabel {{
@@ -234,131 +234,131 @@ class ReorderMode:
                     }}
                 """)
         
-        # Update position numbers
+        # Обновление номеров позиций
         self._add_position_numbers()    
+
     def move_left(self):
-        """Moves target position left"""
+        """Перемещает целевую позицию влево"""
         if not self.is_active:
             return False
         
         num_apps = len(self.launcher.apps)
         
         if num_apps <= 5:
-            # Linear movement
+            # Линейное перемещение
             if self.target_index > 0:
                 self.target_index -= 1
-                # Don't animate, just update highlights
+                # Без анимации, только обновление подсветки
                 self._update_tile_highlights()
                 return True
         else:
-            # Circular movement - update target BEFORE animation
+            # Циклическое перемещение — обновление цели ДО анимации
             new_target = (self.target_index - 1) % num_apps
             self.target_index = new_target
             self.launcher.current_index = self.target_index
             self.launcher.animate_carousel("left")
-            # Highlights will update after animation
+            # Подсветка обновится после анимации
             QTimer.singleShot(260, self._update_tile_highlights)
             return True
         
         return False
     
     def move_right(self):
-        """Moves target position right"""
+        """Перемещает целевую позицию вправо"""
         if not self.is_active:
             return False
         
         num_apps = len(self.launcher.apps)
         
         if num_apps <= 5:
-            # Linear movement
+            # Линейное перемещение
             if self.target_index < num_apps - 1:
                 self.target_index += 1
-                # Don't animate, just update highlights
+                # Без анимации, только обновление подсветки
                 self._update_tile_highlights()
                 return True
         else:
-            # Circular movement - update target BEFORE animation
+            # Циклическое перемещение — обновление цели ДО анимации
             new_target = (self.target_index + 1) % num_apps
             self.target_index = new_target
             self.launcher.current_index = self.target_index
             self.launcher.animate_carousel("right")
-            # Highlights will update after animation
+            # Подсветка обновится после анимации
             QTimer.singleShot(260, self._update_tile_highlights)
             return True
         
         return False
     
     def confirm_reorder(self):
-        """Confirms and applies the reorder"""
+        """Подтверждает и применяет изменения порядка"""
         if not self.is_active:
             return False
         
-        # Set flag IMMEDIATELY to block any other handlers
+        # Установка флага НЕМЕДЛЕННО для блокировки любых других обработчиков
         self.recently_exited = True
         
         if self.selected_index != self.target_index:
-            # Perform the reorder
+            # Выполнение перестановки
             app_to_move = self.launcher.apps.pop(self.selected_index)
             self.launcher.apps.insert(self.target_index, app_to_move)
             
-            # Update current index to follow the moved app
+            # Обновление текущего индекса для следования за перемещенным приложением
             self.launcher.current_index = self.target_index
             
-            # Save and rebuild
+            # Сохранение и пересоздание
             self.launcher.save_config()
             
-            print(f"✅ Moved '{app_to_move['name']}' from position {self.selected_index} to {self.target_index}")
+            print(f"✅ Перемещено '{app_to_move['name']}' из позиции {self.selected_index} в {self.target_index}")
         
         self._exit_reorder()
-        # Rebuild AFTER exiting to avoid triggering reorder mode again
+        # Пересоздание ПОСЛЕ выхода, чтобы избежать повторной активации режима сортировки
         self.launcher.build_infinite_carousel()
         
-        # Longer cooldown after confirm to prevent accidental launch
-        self.exit_cooldown_timer.start(1000)  # 1 second cooldown
+        # Увеличенная задержка после подтверждения для предотвращения случайного запуска
+        self.exit_cooldown_timer.start(1000)  # Задержка 1 секунда
         return True
     
     def cancel_reorder(self):
-        """Cancels reorder mode without changes"""
+        """Отменяет режим сортировки без изменений"""
         if not self.is_active:
             return False
         
-        # Return to original position
+        # Возврат в исходную позицию
         original_index = self.selected_index
         
-        print("❌ Reorder cancelled")
+        print("❌ Сортировка отменена")
         self._exit_reorder()
         
-        # Rebuild AFTER exiting
+        # Пересоздание ПОСЛЕ выхода
         self.launcher.current_index = original_index
         self.launcher.build_infinite_carousel()
         return True
     
     def _exit_reorder(self):
-        """Exits reorder mode and cleans up"""
+        """Выходит из режима сортировки и выполняет очистку"""
         self.is_active = False
         self.selected_index = None
         self.target_index = None
         self._hide_reorder_ui()
         
-        # Set cooldown to prevent immediate reactivation
+        # Установка задержки для предотвращения немедленной повторной активации
         self.recently_exited = True
-        self.exit_cooldown_timer.start(500)  # 500ms cooldown
+        self.exit_cooldown_timer.start(500)  # Задержка 500 мс
         
-        # Force stop any timers
+        # Принудительная остановка всех таймеров
         self.cancel_long_press()
     
     def handle_joypad_button(self, button_index):
-        """Handles joypad button for reorder mode - RB button (5) toggles"""
+        """Обрабатывает кнопку геймпада для режима сортировки — кнопка RB (5) переключает"""
         current_time = time.time()
         if button_index in self.last_button_times and current_time - self.last_button_times[button_index] < 0.3:
             return False
         self.last_button_times[button_index] = current_time
 
-        # RB button toggles reorder mode
-        if button_index in (5, 10):  # RB button
-            # Don't activate if dialog is open or in menu
+        # Кнопка RB переключает режим сортировки
+        if button_index in (5, 10):  # Кнопка RB
+            # Не активировать, если открыт диалог или меню
             if self._is_dialog_active() or self.launcher.is_in_menu:
-                
                 return False
                 
             if not self.is_active:
@@ -374,32 +374,31 @@ class ReorderMode:
 
 def integrate_reorder_mode(launcher):
     """
-    Integrates reorder mode into the launcher.
-    Call this from TVLauncher.__init__() after self.init_ui()
+    Интегрирует режим сортировки в лаунчер.
+    Вызывайте это из TVLauncher.__init__() после self.init_ui()
     
-    Usage:
+    Использование:
         from app_reorder import integrate_reorder_mode
-        # In TVLauncher.__init__:
+        # В TVLauncher.__init__:
         integrate_reorder_mode(self)
     """
     launcher.reorder_mode = ReorderMode(launcher)
     
-    # Store original keyPressEvent
+    # Сохранение исходного keyPressEvent
     original_key_press = launcher.keyPressEvent
     
     def enhanced_key_press(event):
-        """Enhanced keyPressEvent with reorder support"""
+        """Улучшенный keyPressEvent с поддержкой сортировки"""
         if event.isAutoRepeat():
             original_key_press(event)
             return
         
         key = event.key()
         
-        # R key toggles reorder mode
+        # Клавиша R переключает режим сортировки
         if key == Qt.Key.Key_R:
-            # Don't activate if dialog is open or in menu
+            # Не активировать, если открыт диалог или меню
             if launcher.reorder_mode._is_dialog_active() or launcher.is_in_menu:
-                
                 original_key_press(event)
                 return
                 
@@ -410,7 +409,7 @@ def integrate_reorder_mode(launcher):
                 launcher.reorder_mode.cancel_reorder()
             return
         
-        # In reorder mode, intercept navigation
+        # В режиме сортировки перехват навигации
         if launcher.reorder_mode.is_active:
             if key == Qt.Key.Key_Left:
                 if launcher.reorder_mode.move_left():
@@ -425,19 +424,19 @@ def integrate_reorder_mode(launcher):
                 if launcher.reorder_mode.cancel_reorder():
                     return
         else:
-            # Long press detection for Enter key (only if not in menu/dialog)
+            # Определение длинного нажатия для клавиши Enter (только если не в меню/диалоге)
             if key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
                 if not launcher.is_in_menu and not launcher.reorder_mode._is_dialog_active():
                     launcher.reorder_mode.start_long_press()
         
-        # Pass to original handler
+        # Передача исходному обработчику
         original_key_press(event)
     
-    # Store original keyReleaseEvent if it exists
+    # Сохранение исходного keyReleaseEvent, если он существует
     original_key_release = getattr(launcher, 'keyReleaseEvent', None)
     
     def enhanced_key_release(event):
-        """Enhanced keyReleaseEvent for long press detection"""
+        """Улучшенный keyReleaseEvent для определения длинного нажатия"""
         if event.isAutoRepeat():
             return
         
@@ -450,61 +449,58 @@ def integrate_reorder_mode(launcher):
         if original_key_release:
             original_key_release(event)
     
-    # Store original launch_current_app to cancel timers
+    # Сохранение исходного launch_current_app для отмены таймеров
     original_launch = launcher.launch_current_app
     launcher.reorder_active = False
     launcher.reorder_original_index = 0
     launcher.reorder_overlay = None
-    # Salva il metodo originale keyPressEvent
-    original_key_press = launcher.keyPressEvent
     
-    # Salva il metodo originale keyPressEvent
+    # Сохранение исходного метода keyPressEvent
     original_key_press = launcher.keyPressEvent
     
     def enhanced_launch():
-        """Enhanced launch that cancels all reorder timers"""
-        # Force cancel any pending reorder activation
+        """Улучшенный запуск, который отменяет все таймеры сортировки"""
+        # Принудительная отмена любого ожидающего активирования сортировки
         launcher.reorder_mode.force_cancel_all_timers()
         launcher.reorder_mode.recently_exited = False
-        # Call original launch
+        # Вызов исходного запуска
         original_launch()
     
     launcher.launch_current_app = enhanced_launch
     
-    # Store original handle_button
+    # Сохранение исходного handle_button
     original_handle_button = getattr(launcher, 'handle_button', lambda button_index: None)
 
     def enhanced_handle_button(button_index):
-        """Enhanced button handler with reorder support"""
-        # CRITICAL: Block all button handling during cooldown
+        """Улучшенный обработчик кнопок с поддержкой сортировки"""
+        # КРИТИЧЕСКИ ВАЖНО: Блокировка всей обработки кнопок во время задержки
         if launcher.reorder_mode.recently_exited:
-            
             return
         
-        # In reorder mode, handle A and B buttons specially
+        # В режиме сортировки специальная обработка кнопок A и B
         if launcher.reorder_mode.is_active:
-            if button_index == 0:  # A button - confirm reorder
-                print("✅ A button pressed in reorder mode - confirming")
+            if button_index == 0:  # Кнопка A — подтвердить сортировку
+                print("✅ Нажата кнопка A в режиме сортировки — подтверждение")
                 launcher.reorder_mode.confirm_reorder()
-                return  # Don't pass to original handler
-            elif button_index == 1:  # B button - cancel reorder
-                print("❌ B button pressed in reorder mode - canceling")
+                return  # Не передавать исходному обработчику
+            elif button_index == 1:  # Кнопка B — отменить сортировку
+                print("❌ Нажата кнопка B в режиме сортировки — отмена")
                 launcher.reorder_mode.cancel_reorder()
-                return  # Don't pass to original handler
+                return  # Не передавать исходному обработчику
         
-        # RB button (button 5) toggles reorder mode
+        # Кнопка RB (кнопка 5) переключает режим сортировки
         if launcher.reorder_mode.handle_joypad_button(button_index):
             return
         
-        # Pass to original handler if not handled by reorder mode
+        # Передача исходному обработчику, если не обработано режимом сортировки
         original_handle_button(button_index)
     
-    # Store original handle_navigation and enhance it for controller support in reorder mode
+    # Сохранение исходного handle_navigation и его улучшение для поддержки контроллера в режиме сортировки
     if hasattr(launcher, 'handle_navigation'):
         original_handle_navigation = launcher.handle_navigation
         
         def enhanced_handle_navigation(direction):
-            """Enhanced navigation handler with reorder support"""
+            """Улучшенный обработчик навигации с поддержкой сортировки"""
             if launcher.reorder_mode.is_active:
                 if direction == "left":
                     return launcher.reorder_mode.move_left()
@@ -516,19 +512,19 @@ def integrate_reorder_mode(launcher):
         
         launcher.handle_navigation = enhanced_handle_navigation
     
-    # Replace methods
+    # Замена методов
     launcher.keyPressEvent = enhanced_key_press
     launcher.keyReleaseEvent = enhanced_key_release
     launcher.handle_button = enhanced_handle_button
     
-    # Update instructions label
+    # Обновление метки инструкций
     if hasattr(launcher, 'findChild'):
         instructions = launcher.findChildren(QLabel)
         for label in instructions:
-            if "Navigate:" in label.text():
+            if "Navigate:" in label.text() or "Навигация:" in label.text():
                 label.setText(
-                    "Navigate: ← → ↑ ↓ | Launch: Enter/A | Edit: E/X | Delete: Del/Y | "
-                    "Settings: S/Start | Reorder: R/RB | Search: F/LB | Exit: Esc/B"
+                    "Навигация: ← → ↑ ↓ | Запуск: Enter/A | Изменить: E/X | Удалить: Del/Y | "
+                    "Настройки: S/Start | Сортировка: R/RB | Поиск: F/LB | Выход: Esc/B"
                 )
                 label.setStyleSheet(f"""
                         color: rgba(255, 255, 255, 0.3);
@@ -536,3 +532,4 @@ def integrate_reorder_mode(launcher):
                         background: transparent;
                     """)
                 break
+
